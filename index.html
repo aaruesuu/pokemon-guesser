@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポケモンゲッサー</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- CSSファイルを読み込み -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+
+    <div class="container mx-auto p-4 max-w-3xl">
+        <header class="text-center mb-6">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-wider">Pokémon Guesser</h1>
+            <p class="text-gray-400 mt-2">3匹のポケモンを当てるまでの合計回答数を競え！</p>
+        </header>
+
+        <!-- 新規追加: スコア表示エリア -->
+        <div id="game-status" class="text-center text-xl mb-4 flex justify-around">
+            <div>正解数: <span id="correct-count">0</span> / 3</div>
+            <div>合計回答数: <span id="total-guesses">0</span></div>
+        </div>
+
+        <div id="game-controls" class="relative mb-6">
+            <div id="input-area" class="flex gap-2">
+                <input type="text" id="guess-input" placeholder="ポケモンのなまえを入力" class="flex-grow bg-gray-800 border-2 border-gray-700 rounded-lg p-3 text-lg focus:outline-none focus:border-blue-500 transition" autocomplete="off">
+                <button id="guess-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">推測！</button>
+            </div>
+            <div id="suggestions-box" class="absolute hidden w-full max-h-60 overflow-y-auto bg-gray-700 rounded-lg mt-1 z-10 border border-gray-600"></div>
+            <button id="retry-button" class="hidden w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">もう一度挑戦する</button>
+        </div>
+
+        <div id="message-area" class="text-center h-8 mb-4"></div>
+
+        <div id="result-header" class="hidden grid grid-cols-8 gap-2 text-center font-bold text-xs text-gray-400 mb-2 px-2">
+            <span>#</span><span>ポケモン</span><span>世代</span><span>タイプ1</span><span>タイプ2</span><span>高さ</span><span>重さ</span><span>進化回数</span>
+        </div>
+
+        <div id="result-history" class="space-y-2"></div>
+    </div>
+    
+    <!-- JavaScriptファイルを読み込み (順番が重要！) -->
+    <script src="pokedex-data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

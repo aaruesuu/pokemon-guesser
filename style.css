@@ -1,0 +1,33 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.result-row {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* サジェストボックスのスクロールバー用スタイル */
+#suggestions-box::-webkit-scrollbar {
+    width: 8px;
+}
+#suggestions-box::-webkit-scrollbar-track {
+    background: #4a5568;
+}
+#suggestions-box::-webkit-scrollbar-thumb {
+    background: #718096;
+    border-radius: 4px;
+}
+#suggestions-box::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}

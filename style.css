@@ -2,6 +2,10 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
+#mode-selection-screen, #game-container, #score-screen {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
 .result-row {
     animation: fadeIn 0.5s ease-out forwards;
 }
@@ -9,11 +13,9 @@ body {
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
@@ -31,3 +33,4 @@ body {
 #suggestions-box::-webkit-scrollbar-thumb:hover {
     background: #a0aec0;
 }
+

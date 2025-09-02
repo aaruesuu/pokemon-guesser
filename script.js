@@ -181,17 +181,125 @@ function updateStatus() {
 
 // --- API通信とデータ処理 ---
 
+/**
+ * ポケモンデータをAPIから取得する
+ * @param {string|number} pokemonIdentifier ポケモン名(英語)または図鑑番号
+ * @returns {Promise<object|null>} ポケモンデータオブジェクト or null
+ */
 async function fetchPokemonData(pokemonIdentifier) {
-    // ... (この関数は変更なし)
+    try {
+        const identifier = pokemonIdentifier.toString().toLowerCase();
+        const pokemonRes = await fetch(`${POKEAPI_BASE_URL}pokemon/${identifier}`);
+        if (!pokemonRes.ok) throw new Error('Pokemon not found');
+        const pokemonData = await pokemonRes.json();
+        
+        const speciesRes = await fetch(pokemonData.species.url);
+        if (!speciesRes.ok) throw new Error('Species not found');
+        const speciesData = await speciesRes.json();
+        
+        const evolutionChainRes = await fetch(speciesData.evolution_chain.url);
+        if (!evolutionChainRes.ok) throw new Error('Evolution chain not found');
+        const evolutionChainData = await evolutionChainRes.json();
+        
+        const evolutionCount = getEvolutionCount(evolutionChainData, speciesData.name);
+        
+        const name = speciesData.names.find(n => n.language.name === 'ja-Hrkt')?.name || pokemonData.name;
+        
+        let generationId = 8; // デフォルトはヒスイ地方などを含む8世代
+        if (speciesData.generation) {
+            const generationUrl = speciesData.generation.url;
+            generationId = parseInt(generationUrl.split('/').slice(-2, -1)[0]);
+        }
+        
+        const typeNameMap = {"normal":"ノーマル","fire":"ほのお","water":"みず","grass":"くさ","electric":"でんき","ice":"こおり","fighting":"かくとう","poison":"どく","ground":"じめん","flying":"ひこう","psychic":"エスパー","bug":"むし","rock":"いわ","ghost":"ゴースト","dragon":"ドラゴン","dark":"あく","steel":"はがね","fairy":"フェアリー"};
+        const japaneseTypes = pokemonData.types.map(t => typeNameMap[t.type.name] || t.type.name);
+
+        return {
+            id: pokemonData.id,
+            name: name,
+            generation: generationId,
+            type1: japaneseTypes[0] || 'なし',
+            type2: japaneseTypes[1] || 'なし',
+            height: pokemonData.height / 10,
+            weight: pokemonData.weight / 10,
+            sprite: pokemonData.sprites.front_default,
+            evolutionCount: evolutionCount
+        };
+    } catch (error) {
+        console.error(`Data fetch error for ${pokemonIdentifier}:`, error);
+        return null;
+    }
 }
+
+/**
+ * 進化の系統から進化回数を計算する
+ * @param {object} chainData 進化系統データ
+ * @param {string} speciesName ポケモン種族名(英語)
+ * @returns {number} 進化回数 (0, 1, or 2)
+ */
 function getEvolutionCount(chainData, speciesName) {
-    // ... (この関数は変更なし)
+    function findPokemon(stage, count) {
+        if (stage.species.name === speciesName) {
+            return count;
+        }
+        for (const nextStage of stage.evolves_to) {
+            const result = findPokemon(nextStage, count + 1);
+            if (result !== null) return result;
+        }
+        return null;
+    }
+    return findPokemon(chainData.chain, 0) ?? 0;
 }
+
+/**
+ * 2匹のポケモンを比較し、結果を返す
+ * @param {object} guessed 推測したポケモン
+ * @param {object} correct 正解のポケモン
+ * @returns {object} 比較結果オブジェクト
+ */
 function comparePokemon(guessed, correct) {
-    // ... (この関数は変更なし)
+    const result = {};
+    if (guessed.generation === correct.generation) result.generation = 'bg-green-500';
+    else if (Math.abs(guessed.generation - correct.generation) === 1) result.generation = 'bg-yellow-500';
+    else result.generation = 'bg-gray-700';
+
+    if (guessed.type1 === correct.type1) result.type1 = 'bg-green-500';
+    else if (guessed.type1 === correct.type2) result.type1 = 'bg-yellow-500';
+    else result.type1 = 'bg-gray-700';
+
+    if (guessed.type2 === correct.type2) result.type2 = 'bg-green-500';
+    else if (guessed.type2 === correct.type1) result.type2 = 'bg-yellow-500';
+    else result.type2 = 'bg-gray-700';
+
+    result.height = guessed.height > correct.height ? '▼' : (guessed.height < correct.height ? '▲' : '✔');
+    result.weight = guessed.weight > correct.weight ? '▼' : (guessed.weight < correct.weight ? '▲' : '✔');
+    
+    if (guessed.evolutionCount === correct.evolutionCount) result.evolutionCount = 'bg-green-500';
+    else result.evolutionCount = 'bg-gray-700';
+    
+    return result;
 }
+
+/**
+ * 結果を行としてレンダリングする
+ * @param {object} pokemon ポケモンデータ
+ * @param {object} comparison 比較結果
+ */
 function renderResult(pokemon, comparison) {
-    // ... (この関数は変更なし)
+    resultHeader.classList.remove('hidden');
+    const row = document.createElement('div');
+    row.className = 'result-row grid grid-cols-8 gap-2 items-center text-center bg-gray-800 p-2 rounded-lg text-sm';
+    row.innerHTML = `
+        <div class="flex items-center justify-center h-full"><img src="${pokemon.sprite}" alt="${pokemon.name}" class="w-10 h-10"></div>
+        <div class="font-bold">${pokemon.name}</div>
+        <div class="${comparison.generation} rounded p-2">${pokemon.generation}</div>
+        <div class="${comparison.type1} rounded p-2">${pokemon.type1}</div>
+        <div class="${comparison.type2} rounded p-2">${pokemon.type2}</div>
+        <div class="bg-gray-700 rounded p-2">${pokemon.height}m ${comparison.height}</div>
+        <div class="bg-gray-700 rounded p-2">${pokemon.weight}kg ${comparison.weight}</div>
+        <div class="${comparison.evolutionCount} rounded p-2">${pokemon.evolutionCount}</div>
+    `;
+    resultHistory.insertAdjacentElement('afterbegin', row);
 }
 
 

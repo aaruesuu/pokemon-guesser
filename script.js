@@ -1,4 +1,9 @@
 // --- DOM要素の取得 ---
+const modeSelectionScreen = document.getElementById('mode-selection-screen');
+const classicModeButton = document.getElementById('classic-mode-button');
+const scoreAttackButton = document.getElementById('score-attack-button');
+const gameContainer = document.getElementById('game-container');
+const scoreScreen = document.getElementById('score-screen');
 const guessInput = document.getElementById('guess-input');
 const guessButton = document.getElementById('guess-button');
 const messageArea = document.getElementById('message-area');
@@ -6,21 +11,27 @@ const resultHistory = document.getElementById('result-history');
 const resultHeader = document.getElementById('result-header');
 const gameControls = document.getElementById('game-controls');
 const inputArea = document.getElementById('input-area');
-const retryButton = document.getElementById('retry-button');
 const suggestionsBox = document.getElementById('suggestions-box');
-const correctCountSpan = document.getElementById('correct-count');
-const totalGuessesSpan = document.getElementById('total-guesses');
+const nextQuestionButton = document.getElementById('next-question-button');
+const backToMenuButton = document.getElementById('back-to-menu-button');
+const playAgainButton = document.getElementById('play-again-button');
+const finalScoreSpan = document.getElementById('final-score');
+const gameTitle = document.getElementById('game-title');
+const gameDescription = document.getElementById('game-description');
+const gameStatus = document.getElementById('game-status');
 
 // --- グローバル変数と定数 ---
 const allPokemonNames = Object.keys(pokemonNameMap);
 let correctPokemon = null;
-let gameOver = false;
 const POKEAPI_BASE_URL = 'https://pokeapi.co/api/v2/';
 
-// --- 新モード用のゲーム状態変数 ---
+// --- ゲーム状態変数 ---
+let gameMode = null; // 'classic' or 'scoreAttack'
+let gameOver = false;
+let guessesLeft = 5;
 let correctCount = 0;
 let totalGuesses = 0;
-let answeredPokemonIds = new Set(); // 回答済みの正解ポケモンIDを保存
+let answeredPokemonIds = new Set();
 
 // --- メインロジック ---
 
@@ -34,13 +45,57 @@ function hiraToKana(str) {
 }
 
 /**
- * ゲームの初期化、または次の問題を開始する
+ * 特定のゲームモードでゲームを開始する
+ * @param {string} mode 'classic' または 'scoreAttack'
+ */
+function startGame(mode) {
+    gameMode = mode;
+    resetGame();
+    
+    modeSelectionScreen.classList.add('hidden');
+    scoreScreen.classList.add('hidden');
+    gameContainer.classList.remove('hidden');
+    
+    setupUIForMode();
+    initGame();
+}
+
+/**
+ * UIを現在のゲームモードに合わせて設定する
+ */
+function setupUIForMode() {
+    if (gameMode === 'classic') {
+        gameTitle.textContent = 'クラシックモード';
+        gameDescription.textContent = '5回のうちにポケモンを当てよう！';
+    } else {
+        gameTitle.textContent = 'スコアアタック';
+        gameDescription.textContent = '3匹当てるまでの合計回答数を競え！';
+    }
+    updateStatusUI();
+}
+
+/**
+ * ゲーム状態（残り回数やスコア）の表示を更新する
+ */
+function updateStatusUI() {
+    if (gameMode === 'classic') {
+        gameStatus.innerHTML = `<div>残り: <span id="guesses-left">${guessesLeft}</span> 回</div>`;
+    } else {
+        gameStatus.innerHTML = `
+            <div>正解数: <span id="correct-count">${correctCount}</span> / 3</div>
+            <div>合計回答数: <span id="total-guesses">${totalGuesses}</span></div>`;
+    }
+}
+
+/**
+ * 新しい問題（ポケモン）を読み込む
  */
 async function initGame() {
-    messageArea.textContent = `${correctCount + 1} 問目のポケモンを読み込み中...`;
+    guessInput.disabled = true;
+    guessButton.disabled = true;
+    messageArea.textContent = `次のポケモンを読み込み中...`;
     
     let randomId;
-    // すでに出題されたポケモンは避ける
     do {
         randomId = Math.floor(Math.random() * 905) + 1;
     } while (answeredPokemonIds.has(randomId));
@@ -48,32 +103,35 @@ async function initGame() {
     correctPokemon = await fetchPokemonData(randomId);
     
     if (correctPokemon) {
-        console.log(`${correctCount + 1}問目の正解:`, correctPokemon);
-        messageArea.textContent = `[${correctCount + 1} / 3 問目] ポケモンを推測しよう！`;
-        resultHistory.innerHTML = ''; // 前の問題の履歴をクリア
+        console.log(`正解:`, correctPokemon);
+        messageArea.textContent = `ポケモンを推測しよう！`;
+        resultHistory.innerHTML = '';
         resultHeader.classList.add('hidden');
+        guessInput.disabled = false;
+        guessButton.disabled = false;
+        guessInput.focus();
     } else {
-        messageArea.textContent = 'ポケモンの読み込みに失敗しました。再試行します...';
-        setTimeout(initGame, 1000);
+        messageArea.textContent = '読み込みに失敗しました。再試行します...';
+        setTimeout(initGame, 2000);
     }
 }
 
 /**
- * ゲーム全体をリセットする
+ * ゲーム状態をリセットする
  */
 function resetGame() {
+    gameOver = false;
+    guessesLeft = 5;
     correctCount = 0;
     totalGuesses = 0;
     answeredPokemonIds.clear();
-    gameOver = false;
-
-    updateStatus(); // 表示を0にリセット
     
     messageArea.textContent = '';
-    retryButton.classList.add('hidden');
     inputArea.classList.remove('hidden');
+    nextQuestionButton.classList.add('hidden');
+    backToMenuButton.classList.add('hidden');
     
-    initGame();
+    updateStatusUI();
 }
 
 /**
@@ -103,41 +161,69 @@ async function handleGuess() {
         return;
     }
     
-    totalGuesses++;
-    updateStatus();
+    if (gameMode === 'classic') {
+        guessesLeft--;
+    } else {
+        totalGuesses++;
+    }
+
+    updateStatusUI();
     
     const comparison = comparePokemon(guessedPokemon, correctPokemon);
     renderResult(guessedPokemon, comparison);
 
-    // 正解した場合の処理
-    if (guessedPokemon.id === correctPokemon.id) {
-        correctCount++;
-        answeredPokemonIds.add(correctPokemon.id);
-        updateStatus();
+    const isCorrect = guessedPokemon.id === correctPokemon.id;
 
-        if (correctCount < 3) {
-            messageArea.textContent = `正解！ ${correctPokemon.name} でした！ 次の問題へ！`;
-            // 少し待ってから次の問題へ
-            setTimeout(initGame, 2000); 
-        } else {
-            messageArea.textContent = `ゲームクリア！最終スコアは ${totalGuesses} 回でした！`;
+    if (gameMode === 'classic') {
+        if (isCorrect) {
+            messageArea.textContent = `正解！おめでとう！答えは ${correctPokemon.name} でした！`;
             endGame();
+        } else if (guessesLeft === 0) {
+            messageArea.textContent = `残念！ゲームオーバー。正解は ${correctPokemon.name} でした。`;
+            endGame();
+        } else {
+            messageArea.textContent = `ポケモンを推測しよう！`;
         }
-    } else {
-        messageArea.textContent = `[${correctCount + 1} / 3 問目] ポケモンを推測しよう！`;
+    } else { // scoreAttack
+        if (isCorrect) {
+            correctCount++;
+            answeredPokemonIds.add(correctPokemon.id);
+            updateStatusUI();
+
+            if (correctCount < 3) {
+                messageArea.textContent = `正解！ ${correctPokemon.name} でした！`;
+                inputArea.classList.add('hidden');
+                nextQuestionButton.classList.remove('hidden');
+            } else {
+                showScoreScreen();
+            }
+        } else {
+            messageArea.textContent = `ポケモンを推測しよう！`;
+        }
     }
     
     guessInput.value = '';
-    guessButton.disabled = false;
+    if(!gameOver && !isCorrect) {
+        guessButton.disabled = false;
+    }
 }
 
 /**
- * ゲーム終了時の処理
+ * ゲーム終了時の処理 (主にクラシックモード用)
  */
 function endGame() {
     gameOver = true;
     inputArea.classList.add('hidden');
-    retryButton.classList.remove('hidden');
+    backToMenuButton.classList.remove('hidden');
+}
+
+/**
+ * スコアアタッククリア時のスコア画面表示
+ */
+function showScoreScreen() {
+    finalScoreSpan.textContent = totalGuesses;
+    gameContainer.classList.add('hidden');
+    scoreScreen.classList.remove('hidden');
 }
 
 /**
@@ -170,16 +256,6 @@ function handleInput() {
         suggestionsBox.classList.add('hidden');
     }
 }
-
-/**
- * スコア表示を更新する
- */
-function updateStatus() {
-    correctCountSpan.textContent = correctCount;
-    totalGuessesSpan.textContent = totalGuesses;
-}
-
-// --- API通信とデータ処理 ---
 
 /**
  * ポケモンデータをAPIから取得する
@@ -239,7 +315,8 @@ async function fetchPokemonData(pokemonIdentifier) {
  */
 function getEvolutionCount(chainData, speciesName) {
     function findPokemon(stage, count) {
-        if (stage.species.name === speciesName) {
+        // 'aegislash'のような名前と'aegislash-shield'のようなAPIの種族名が異なる場合があるので、-で分割して比較
+        if (stage.species.name.startsWith(speciesName.split('-')[0])) {
             return count;
         }
         for (const nextStage of stage.evolves_to) {
@@ -268,7 +345,7 @@ function comparePokemon(guessed, correct) {
     else result.type1 = 'bg-gray-700';
 
     if (guessed.type2 === correct.type2) result.type2 = 'bg-green-500';
-    else if (guessed.type2 === correct.type1) result.type2 = 'bg-yellow-500';
+    else if (guessed.type2 === correct.type1 && guessed.type2 !== 'なし') result.type2 = 'bg-yellow-500';
     else result.type2 = 'bg-gray-700';
 
     result.height = guessed.height > correct.height ? '▼' : (guessed.height < correct.height ? '▲' : '✔');
@@ -302,24 +379,35 @@ function renderResult(pokemon, comparison) {
     resultHistory.insertAdjacentElement('afterbegin', row);
 }
 
-
 // --- イベントリスナーの設定 ---
-guessButton.addEventListener('click', handleGuess);
-guessInput.addEventListener('keydown', (event) => {
-    if (event.isComposing && event.key === 'Enter') {
-        return;
-    }
-    if (!event.isComposing && event.key === 'Enter') {
-        handleGuess();
-    }
-});
-retryButton.addEventListener('click', resetGame);
-guessInput.addEventListener('input', handleInput);
-document.addEventListener('click', (event) => {
-    if (!gameControls.contains(event.target)) {
-        suggestionsBox.classList.add('hidden');
-    }
-});
+document.addEventListener('DOMContentLoaded', () => {
+    classicModeButton.addEventListener('click', () => startGame('classic'));
+    scoreAttackButton.addEventListener('click', () => startGame('scoreAttack'));
 
-// --- ゲーム開始 ---
-initGame();
+    guessButton.addEventListener('click', handleGuess);
+    guessInput.addEventListener('keydown', (event) => {
+        if (event.isComposing) return;
+        if (event.key === 'Enter') handleGuess();
+    });
+
+    nextQuestionButton.addEventListener('click', () => {
+        nextQuestionButton.classList.add('hidden');
+        inputArea.classList.remove('hidden');
+        initGame();
+    });
+
+    const backToMenu = () => {
+        gameContainer.classList.add('hidden');
+        scoreScreen.classList.add('hidden');
+        modeSelectionScreen.classList.remove('hidden');
+    };
+    backToMenuButton.addEventListener('click', backToMenu);
+    playAgainButton.addEventListener('click', backToMenu);
+
+    guessInput.addEventListener('input', handleInput);
+    document.addEventListener('click', (event) => {
+        if (!gameControls.contains(event.target)) {
+            suggestionsBox.classList.add('hidden');
+        }
+    });
+});

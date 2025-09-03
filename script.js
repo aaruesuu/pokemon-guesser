@@ -19,6 +19,7 @@ const finalScoreSpan = document.getElementById('final-score');
 const gameTitle = document.getElementById('game-title');
 const gameDescription = document.getElementById('game-description');
 const gameStatus = document.getElementById('game-status');
+const homeButton = document.getElementById('home-button');
 
 // --- グローバル変数と定数 ---
 const allPokemonNames = Object.keys(pokemonNameMap);
@@ -403,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     backToMenuButton.addEventListener('click', backToMenu);
     playAgainButton.addEventListener('click', backToMenu);
+    homeButton.addEventListener('click', backToMenu); // ★ HOMEボタンにイベントを追加
 
     guessInput.addEventListener('input', handleInput);
     document.addEventListener('click', (event) => {

@@ -33,6 +33,7 @@ let guessesLeft = 5;
 let correctCount = 0;
 let totalGuesses = 0;
 let answeredPokemonIds = new Set();
+const MAX_POKEMON_ID = 1025;
 
 // --- メインロジック ---
 
@@ -97,11 +98,42 @@ async function initGame() {
     messageArea.textContent = `次のポケモンを読み込み中...`;
     
     let randomId;
-    do {
-        randomId = Math.floor(Math.random() * 905) + 1;
-    } while (answeredPokemonIds.has(randomId));
+    let retries = 0;
+    const maxRetries = 20;
 
-    correctPokemon = await fetchPokemonData(randomId);
+    // 既に出題されたIDは避け、有効なIDが見つかるまで試行する
+    while (true) {
+        randomId = Math.floor(Math.random() * MAX_POKEMON_ID) + 1;
+        
+        // gen9Data または pokedex-data.js (API対象) に存在するIDかチェック
+        const existsInGen9 = Object.values(gen9Data).some(data => data.id === randomId);
+        const existsInApi = Object.values(pokemonNameMap).some(name => {
+            const idFromMap = parseInt(name.split('-')[0]); // これは不正確なので使わない
+            return false; // API対象のIDチェックは困難なため、ここでは行わない
+        });
+
+        // 簡略化：とりあえずIDが存在しそうか（欠番でないか）で判断
+        // 厳密な欠番チェックはデータが完全でないと難しいため、エラーハンドリングに任せる
+        if (!answeredPokemonIds.has(randomId)) {
+            break;
+        }
+
+        retries++;
+        if (retries > maxRetries) {
+            console.warn("出題済みのポケモンが多いため、履歴をリセットします。");
+            answeredPokemonIds.clear(); 
+        }
+    }
+    
+    // IDが906以上なら、それは第9世代 (DLC含む)
+    if (randomId >= 906) {
+        const gen9Entry = Object.values(gen9Data).find(data => data.id === randomId);
+        if (gen9Entry) {
+            correctPokemon = gen9Entry;
+        }
+    } else {
+        correctPokemon = await fetchPokemonDataFromApi(randomId);
+    }
     
     if (correctPokemon) {
         console.log(`正解:`, correctPokemon);
@@ -112,8 +144,10 @@ async function initGame() {
         guessButton.disabled = false;
         guessInput.focus();
     } else {
-        messageArea.textContent = '読み込みに失敗しました。再試行します...';
-        setTimeout(initGame, 2000);
+        // 読み込みに失敗した場合、ループに陥らないようにそのIDは一時的に避ける
+        answeredPokemonIds.add(randomId);
+        messageArea.textContent = `[ID: ${randomId}] の読み込みに失敗。再試行します...`;
+        setTimeout(initGame, 50); // すぐに再試行
     }
 }
 
@@ -146,15 +180,22 @@ async function handleGuess() {
 
     suggestionsBox.classList.add('hidden');
 
-    const guessNameEn = pokemonNameMap[guessNameJa];
-    if (!guessNameEn) {
-        messageArea.textContent = `「${guessNameJa}」というポケモンは見つかりませんでした。`;
-        return;
+    // ★ データソースを切り替える
+    let guessedPokemon = null;
+    if (gen9Data[guessNameJa]) {
+        // 第9世代のポケモンならローカルデータから取得
+        guessedPokemon = gen9Data[guessNameJa];
+    } else {
+        // それ以外はAPIから取得
+        const guessNameEn = pokemonNameMap[guessNameJa];
+        if (!guessNameEn) {
+            messageArea.textContent = `「${guessNameJa}」というポケモンは見つかりませんでした。`;
+            return;
+        }
+        guessButton.disabled = true;
+        messageArea.textContent = `${guessNameJa}の情報を調べています...`;
+        guessedPokemon = await fetchPokemonDataFromApi(guessNameEn);
     }
-    
-    guessButton.disabled = true;
-    messageArea.textContent = `${guessNameJa}の情報を調べています...`;
-    const guessedPokemon = await fetchPokemonData(guessNameEn);
 
     if (!guessedPokemon) {
         messageArea.textContent = `「${guessNameJa}」のデータ取得に失敗しました。`;
@@ -162,19 +203,16 @@ async function handleGuess() {
         return;
     }
     
+    // (以降のゲーム進行ロジックは変更なし)
     if (gameMode === 'classic') {
         guessesLeft--;
     } else {
-        totalGuesses++;
+        totalGuesses++; 
     }
-
     updateStatusUI();
-    
     const comparison = comparePokemon(guessedPokemon, correctPokemon);
     renderResult(guessedPokemon, comparison);
-
     const isCorrect = guessedPokemon.id === correctPokemon.id;
-
     if (gameMode === 'classic') {
         if (isCorrect) {
             messageArea.textContent = `正解！おめでとう！答えは ${correctPokemon.name} でした！`;
@@ -182,15 +220,13 @@ async function handleGuess() {
         } else if (guessesLeft === 0) {
             messageArea.textContent = `残念！ゲームオーバー。正解は ${correctPokemon.name} でした。`;
             endGame();
-        } else {
-            messageArea.textContent = `ポケモンを推測しよう！`;
+        } else { messageArea.textContent = `ポケモンを推測しよう！`;
         }
-    } else { // scoreAttack
+    } else {
         if (isCorrect) {
             correctCount++;
             answeredPokemonIds.add(correctPokemon.id);
             updateStatusUI();
-
             if (correctCount < 3) {
                 messageArea.textContent = `正解！ ${correctPokemon.name} でした！`;
                 inputArea.classList.add('hidden');
@@ -202,11 +238,8 @@ async function handleGuess() {
             messageArea.textContent = `ポケモンを推測しよう！`;
         }
     }
-    
     guessInput.value = '';
-    if(!gameOver && !isCorrect) {
-        guessButton.disabled = false;
-    }
+    if (!gameOver && !isCorrect) { guessButton.disabled = false; }
 }
 
 /**
@@ -263,44 +296,32 @@ function handleInput() {
  * @param {string|number} pokemonIdentifier ポケモン名(英語)または図鑑番号
  * @returns {Promise<object|null>} ポケモンデータオブジェクト or null
  */
-async function fetchPokemonData(pokemonIdentifier) {
+async function fetchPokemonDataFromApi(pokemonIdentifier) {
     try {
         const identifier = pokemonIdentifier.toString().toLowerCase();
         const pokemonRes = await fetch(`${POKEAPI_BASE_URL}pokemon/${identifier}`);
         if (!pokemonRes.ok) throw new Error('Pokemon not found');
         const pokemonData = await pokemonRes.json();
-        
         const speciesRes = await fetch(pokemonData.species.url);
         if (!speciesRes.ok) throw new Error('Species not found');
         const speciesData = await speciesRes.json();
-        
         const evolutionChainRes = await fetch(speciesData.evolution_chain.url);
         if (!evolutionChainRes.ok) throw new Error('Evolution chain not found');
         const evolutionChainData = await evolutionChainRes.json();
-        
         const evolutionCount = getEvolutionCount(evolutionChainData, speciesData.name);
-        
         const name = speciesData.names.find(n => n.language.name === 'ja-Hrkt')?.name || pokemonData.name;
-        
-        let generationId = 8; // デフォルトはヒスイ地方などを含む8世代
+        let generationId = 8;
         if (speciesData.generation) {
             const generationUrl = speciesData.generation.url;
             generationId = parseInt(generationUrl.split('/').slice(-2, -1)[0]);
         }
-        
-        const typeNameMap = {"normal":"ノーマル","fire":"ほのお","water":"みず","grass":"くさ","electric":"でんき","ice":"こおり","fighting":"かくとう","poison":"どく","ground":"じめん","flying":"ひこう","psychic":"エスパー","bug":"むし","rock":"いわ","ghost":"ゴースト","dragon":"ドラゴン","dark":"あく","steel":"はがね","fairy":"フェアリー"};
+        const typeNameMap = { "normal": "ノーマル", "fire": "ほのお", "water": "みず", "grass": "くさ", "electric": "でんき", "ice": "こおり", "fighting": "かくとう", "poison": "どく", "ground": "じめん", "flying": "ひこう", "psychic": "エスパー", "bug": "むし", "rock": "いわ", "ghost": "ゴースト", "dragon": "ドラゴン", "dark": "あく", "steel": "はがね", "fairy": "フェアリー" };
         const japaneseTypes = pokemonData.types.map(t => typeNameMap[t.type.name] || t.type.name);
-
         return {
-            id: pokemonData.id,
-            name: name,
-            generation: generationId,
-            type1: japaneseTypes[0] || 'なし',
-            type2: japaneseTypes[1] || 'なし',
-            height: pokemonData.height / 10,
-            weight: pokemonData.weight / 10,
-            sprite: pokemonData.sprites.front_default,
-            evolutionCount: evolutionCount
+            id: pokemonData.id, name: name, generation: generationId,
+            type1: japaneseTypes[0] || 'なし', type2: japaneseTypes[1] || 'なし',
+            height: pokemonData.height / 10, weight: pokemonData.weight / 10,
+            sprite: pokemonData.sprites.front_default, evolutionCount: evolutionCount
         };
     } catch (error) {
         console.error(`Data fetch error for ${pokemonIdentifier}:`, error);

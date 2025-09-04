@@ -24,6 +24,9 @@ const homeButton = document.getElementById('home-button');
 const modalOverlay = document.getElementById('modal-overlay');
 const modalContent = document.getElementById('modal-content');
 const modalCloseButton = document.getElementById('modal-close-button');
+const howToPlayButton = document.getElementById('how-to-play-button');
+const aboutSiteButton = document.getElementById('about-site-button');
+const infoButtons = document.querySelectorAll('.info-button');
 
 // --- グローバル変数と定数 ---
 const allPokemonNames = Object.keys(pokemonNameMap);
@@ -444,6 +447,65 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (event) => {
         if (!gameControls.contains(event.target)) {
             suggestionsBox.classList.add('hidden');
+        }
+    });
+    // モーダルを開く関数
+    const openModal = (title, content) => {
+        modalContent.innerHTML = `<h3>${title}</h3>${content}`;
+        modalOverlay.classList.remove('hidden');
+    };
+
+    // モーダルを閉じる関数
+    const closeModal = () => {
+        modalOverlay.classList.add('hidden');
+    };
+
+    // 「遊び方」ボタンのクリックイベント
+    howToPlayButton.addEventListener('click', () => {
+        openModal('遊び方', `
+            <p>このゲームは、ポケモンの様々なデータをヒントとしながら</p>
+            <p>正解のポケモンを推測するゲームです。</p>
+            <br>
+            <p>回答を入力すると、正解のポケモンと比較したヒントが表示されます。</p>
+            <ul>
+                <li><strong>🟩 緑色:</strong> 完全一致</li>
+                <li><strong>🟨 黄色:</strong> 部分的に一致 (例: タイプ1とタイプ2が逆)</li>
+                <li><strong>⬜️ 灰色:</strong> 不一致</li>
+                <li><strong>▲ / ▼:</strong> 正解より高いか低いかを示します。</li>
+            </ul>
+        `);
+    });
+
+    // 「このサイトについて」ボタンのクリックイベント
+    aboutSiteButton.addEventListener('click', () => {
+        openModal('このサイトについて', `
+            <p>Pokedex Diveは、ポケモンを推測して楽しむファンゲームです。</p>
+            <p>ポケモンのデータは <a href="https://pokeapi.co/" target="_blank" rel="noopener noreferrer">PokéAPI</a> を利用しています。</p>
+            <p>ご意見やバグ報告は、開発者の連絡先までお願いします。</p>
+        `);
+    });
+
+    // 各モードの「？」ボタンのクリックイベント
+    infoButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation(); // ボタンの親要素へのクリックイベントの伝播を停止
+            const mode = event.target.dataset.mode;
+            if (mode === 'scoreAttack') {
+                openModal('スコアモード', '<p>3匹のポケモンを当てるまでにかかった合計回答数を競うモードです。より少ない回数でのクリアを目指しましょう！</p>');
+            } else if (mode === 'classic') {
+                openModal('クラシックモード', '<p>1匹のポケモンを5回の回答チャンスのうちに当てる、シンプルなモードです。</p>');
+            } else if (mode === 'baseStats') {
+                openModal('種族値モード', '<p>ポケモンの「HP、こうげき、ぼうぎょ、とくこう、とくぼう、すばやさ」の6つの種族値のヒントだけを頼りに、3匹のポケモンを当てるモードです。</p>');
+            }
+        });
+    });
+
+    // モーダルを閉じるイベント
+    modalCloseButton.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (event) => {
+        // オーバーレイ（背景）部分をクリックした時だけ閉じる
+        if (event.target === modalOverlay) {
+            closeModal();
         }
     });
 });

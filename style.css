@@ -92,7 +92,6 @@
 body {
     font-family: 'DotGothic16', sans-serif;
     background-color: var(--c-bg);
-    background-image: url('https://www.transparenttextures.com/patterns/pixel-heart.png');
     color: var(--c-text);
     overflow: hidden;
     transition: background-color 0.5s ease;

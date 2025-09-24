@@ -1,95 +1,110 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokedex Dive</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css">
+    <title>Poké Guesser</title>
+    <link rel="stylesheet" href="style1.css">
 </head>
-<body>
 
+<body>
+    <!-- ページ全体のコンテンツを囲むコンテナ -->
     <div id="theme-container">
-        <header id="app-header" class="p-4">
-            <h1 class="logo">Pokedex <span class="logo-accent">Dive</span></h1>
-            <div class="flex items-center gap-4">
+
+        <!-- ヘッダー -->
+        <header id="app-header">
+            <h1 class="logo">Poké <span class="logo-accent">Guesser</span></h1>
+            <div class="header-buttons">
                 <button id="home-button" class="header-button">HOMEへ</button>
                 <button id="how-to-play-button" class="header-button">遊び方</button>
                 <button id="about-site-button" class="header-button">このサイトについて</button>
             </div>
         </header>
 
+        <!-- メインコンテンツ -->
         <main id="main-content">
-            <!-- ===== モード選択画面 ===== -->
-            <div id="mode-selection-screen" class="w-full">
+            <div id="mode-selection-screen">
                 <h2 class="selection-title">プレイするモードを選んでください</h2>
-                <div class="flex flex-col items-center gap-4">
-                    <button id="score-attack-button" class="mode-button score-button w-full max-w-md">
-                        <h3>スコア</h3>
-                        <p>3匹当てるまでの回答数を競え！</p>
+                <div class="mode-selection-container">
+
+                    <!-- スコアモード -->
+                    <button id="score-attack-button" class="mode-button score-button">
+                        <div class="mode-button-content">
+                            <h3>スコアモード</h3>
+                        </div>
                         <div class="info-button" data-mode="scoreAttack">?</div>
                     </button>
-                    <button id="classic-mode-button" class="mode-button classic-button w-full max-w-md">
-                        <h3>クラシック</h3>
-                        <p>5回のうちにポケモンを当てろ！</p>
+
+                    <!-- クラシックモード -->
+                    <button id="classic-mode-button" class="mode-button classic-button">
+                        <div class="mode-button-content">
+                            <h3>クラシックモード</h3>
+                        </div>
                         <div class="info-button" data-mode="classic">?</div>
                     </button>
-                    <button id="base-stats-mode-button" class="mode-button stats-button w-full max-w-md">
-                        <h3>種族値</h3>
-                        <p>種族値をヒントに3匹当てろ！</p>
+
+                    <!-- 種族値モード -->
+                    <button id="base-stats-mode-button" class="mode-button stats-button">
+                        <div class="mode-button-content">
+                            <h3>種族値モード</h3>
+                        </div>
                         <div class="info-button" data-mode="baseStats">?</div>
+
                     </button>
                 </div>
             </div>
 
-            <!-- ===== ゲーム画面 (最初は非表示) ===== -->
+            <!-- ゲーム画面 -->
             <div id="game-container" class="hidden">
+
                 <div id="game-info-area">
                     <h2 id="game-title"></h2>
-                    <p id="game-description"></p>
                 </div>
                 <div id="game-status"></div>
+
                 <div id="game-controls">
+
+                    <!-- 入力フォーム -->
                     <div id="input-area">
                         <input type="text" id="guess-input" placeholder="ポケモンのなまえを入力" autocomplete="off">
-                        <button id="guess-button" class="guess-button">guess</button>
+                        <button id="guess-button" class="guess-button">GUESS</button>
                     </div>
                     <div id="suggestions-box" class="hidden"></div>
-                    <button id="next-question-button" class="hidden action-button">次の問題へ</button>
-                    <button id="back-to-menu-button" class="hidden back-button">モード選択に戻る</button>
-                </div>
-                <div id="message-area"></div>
-                <div id="results-area">
-                    <div id="result-header" class="hidden">
-                        <!-- header content is set by JS -->
+
+                    <!-- アクションボタン -->
+                    <div class="action-buttons">
+                        <button id="next-question-button" class="hidden action-button">次の問題へ</button>
+                        <button id="back-to-menu-button" class="hidden back-button">モード選択に戻る</button>
                     </div>
+
+                </div>
+
+                <div id="message-area"></div>
+
+                <div id="results-area">
+                    <div id="result-header" class="hidden"></div>
                     <div id="result-history"></div>
                 </div>
+
             </div>
 
-            <!-- ===== スコア画面 (最初は非表示) ===== -->
             <div id="score-screen" class="hidden">
-                 <header class="text-center mb-8">
-                    <h2 style="font-size: 2.5rem; font-weight: bold; letter-spacing: 0.1em;">ゲームクリア！</h2>
-                </header>
-                <div class="score-card">
-                    <p>あなたのスコアは...</p>
-                    <p style="font-size: 4rem; font-weight: bold; margin: 1rem 0;"><span id="final-score"></span> <span style="font-size: 1.5rem;">回</span></p>
-                    <button id="play-again-button" class="mode-button classic-button" style="width: 100%; max-width: 200px; margin-top: 1.5rem;">もう一度遊ぶ</button>
+                 <div class="score-card">
+                    <h2 class="score-title">GAME CLEAR!</h2>
+                    <p class="score-subtitle">あなたのスコアは...</p>
+                    <p class="final-score-display"><span id="final-score"></span> <span class="score-unit">回</span></p>
+                    <button id="play-again-button" class="mode-button classic-button">もう一度遊ぶ</button>
                 </div>
             </div>
         </main>
 
-        <footer id="app-footer" class="p-4">
-            <p>&copy; 2025 Pokedex Dive. All rights reserved.</p>
+        <!-- フッター -->
+        <footer id="app-footer">
+            <p id="p-footer">&copy; 2025 Poke Guesser.</p>
         </footer>
     </div>
     
-    <!-- ===== モーダルウィンドウ (レイアウトの外に配置) ===== -->
+    <!-- モーダルウィンドウ -->
     <div id="modal-overlay" class="hidden">
         <div id="modal">
             <button id="modal-close-button">&times;</button>
@@ -97,8 +112,9 @@
         </div>
     </div>
 
+    <!-- JavaScript読み込み -->>
     <script src="pokedex-data.js"></script>
-    <script src="gen9-data.js"></script>
+    <script src="all-pokemon-data.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -42,10 +42,6 @@ let suggestionRequestToken = 0;
 
 // ---------- 初期化処理 ----------
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        setTimeout(() => loaderOverlay.classList.add('hidden'), 500);
-    }, 1500);
-    
     classicModeButton.addEventListener('click', () => startGame('classic'));
     scoreAttackButton.addEventListener('click', () => startGame('scoreAttack'));
     baseStatsModeButton.addEventListener('click', () => startGame('baseStats'));

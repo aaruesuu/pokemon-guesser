@@ -756,25 +756,6 @@ body.game-mode-active .suggestion-item:hover {
 
 .orientation-message p { font-size: 1.2rem; line-height: 1.8; }
 
-.phone-icon {
-    width: 64px; height: 100px;
-    border: 3px solid var(--c-white);
-    border-radius: 10px;
-    margin-bottom: 2rem;
-    position: relative;
-    animation: rotate-phone 1.5s ease-in-out infinite;
-}
-
-.phone-icon::before {
-    content: '';
-    position: absolute;
-    top: 8px; left: 50%;
-    transform: translateX(-50%);
-    width: 20px; height: 4px;
-    background-color: var(--c-white);
-    border-radius: 2px;
-}
-
 @media screen and (max-height: 850px) and (orientation: portrait) {
     #theme-container, #loader-overlay {
         display: none;

@@ -140,15 +140,21 @@ function handleGuess() {
     const comparisonResult = comparePokemon(guessedPokemon, correctPokemon);
     renderResult(guessedPokemon, comparisonResult);
 
+    if (gameMode === 'classic') {
+        guessesLeft--;
+    } else {
+        totalGuesses++;
+    }
+
     if (isCorrectAnswer(guessedPokemon, correctPokemon)) {
         messageArea.textContent = "正解";
         endGame(true);
     }
 
+    suggestionsBox.classList.add('hidden');
+    
     guessInput.value = "";
     guessInput.focus();
-    console.log("正常に処理が完了しました。");
-    console.log("--- GUESS END ---");
 }
 
 // 終了処理

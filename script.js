@@ -43,7 +43,6 @@ let suggestionRequestToken = 0;
 // ---------- 初期化処理 ----------
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        loaderOverlay.style.opacity = '0';
         setTimeout(() => loaderOverlay.classList.add('hidden'), 500);
     }, 1500);
     

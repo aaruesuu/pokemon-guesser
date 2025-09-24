@@ -1,426 +1,785 @@
-/* ===== 基本リセット ===== */
+/* ==========================================================================
+   1. 基本設定 (フォント, 変数, リセット)
+   ========================================================================== */
+
+/* フォント読み込み */
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Zen+Maru+Gothic&display=swap');
+
+/* CSS変数定義 */
+:root {
+    /* --- 基本テーマ --- */
+    --c-bg: #c41e3a;
+    --c-main-bg: #d1e9dd;
+    --c-text: #222;
+    --c-border: #333;
+    --c-accent: #f7d864;
+    --c-header-bg: rgba(0,0,0,0.4);
+    --c-white: #fff;
+    --c-white-op90: rgba(255,255,255,0.9);
+    --c-black: #000;
+    --c-black-op10: rgba(0,0,0,0.1);
+    --c-black-op20: rgba(0,0,0,0.2);
+    --c-black-op30: rgba(0,0,0,0.3);
+    --c-black-op40: rgba(0,0,0,0.4);
+    --c-black-op50: rgba(0,0,0,0.5);
+
+    /* --- ゲームモードテーマ --- */
+    --c-game-bg: #263238;
+    --c-game-main-bg: rgba(38, 50, 56, 0.8);
+    --c-game-text: #e0e0e0;
+    --c-game-border: #455a64;
+    --c-game-accent-gold: #ffd700;
+    --c-game-accent-cyan: #00e0e0;
+    --c-game-accent-gold-op30: rgba(255, 215, 0, 0.3);
+    --c-game-accent-cyan-op30: rgba(0, 230, 230, 0.3);
+    --c-game-shadow-cyan: rgba(0, 230, 230, 0.2);
+    --c-game-shadow-gold: rgba(255, 215, 0, 0.5);
+    --c-game-shadow-gold-inset: rgba(255, 215, 0, 0.2);
+
+    /* --- コンポーネントカラー --- */
+    --c-btn-classic: #53a2d0;
+    --c-btn-score: #42b442;
+    --c-btn-stats: #d8cb41;
+    --c-btn-guess: #c41e3a;
+    --c-footer-text: #e3dada;
+    --c-placeholder-text: #666; /* プレースホルダー用に色を追加 */
+    --c-suggestion-border: #000000;
+    --c-suggestion-bg-hover: #dadada;
+
+    /* --- 判定カラー --- */
+    --c-correct: #64b46c;
+    --c-partial: #f7d864;
+    --c-wrong: #646464;
+    --c-game-correct-bg: rgba(0, 230, 230, 0.3);
+    --c-game-partial-bg: rgba(255, 215, 0, 0.3);
+    --c-game-wrong-bg: rgba(84, 110, 122, 0.4);
+
+    /* --- ゲームモードコンポーネント --- */
+    --c-game-text-light: #cfd8dc;
+    --c-game-text-medium: #b0bec5;
+    --c-game-text-dark: #9e9e9e;
+    --c-game-border-light: #78909c;
+    --c-game-border-medium: #546e7a;
+    --c-game-border-dark: #455a64;
+    --c-game-row-border: #37474f;
+
+    /* --- スクロールバー --- */
+    --c-scroll-track: #cacaca;
+    --c-scroll-thumb: #777;
+    --c-scroll-thumb-hover: #333;
+    --c-game-scroll-track: #263238;
+    --c-game-scroll-thumb: #546e7a;
+
+    /* --- モーダル --- */
+    --c-modal-bg: #37474f;
+
+    /* --- 縦画面案内 --- */
+    --c-orientation-bg: #222;
+
+    /* --- 矢印カラー --- */
+    --c-arrow-up-red: #e63946;
+    --c-arrow-down-blue: #457b9d;
+}
+
+/* 基本スタイルリセット */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* ===== 基本設定とフォント ===== */
 body {
     font-family: 'DotGothic16', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #333;
-    height: 100vh;
-    margin: 0;
+    background-color: var(--c-bg);
+    background-image: url('https://www.transparenttextures.com/patterns/pixel-heart.png');
+    color: var(--c-text);
+    overflow: hidden;
+    transition: background-color 0.5s ease;
 }
+
+/* ==========================================================================
+   2. 全体レイアウト & 共通コンポーネント
+   ========================================================================== */
 
 #theme-container {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 1000px; /* 最大幅を設定 */
+    width: 100vw;
     height: 100vh;
-    max-height: 900px; /* 最大高さを設定 */
-    color: #333;
-    background-color: #d9534f;
+    background: transparent;
+    transition: all 0.5s ease;
+}
+
+#main-content {
+    background-color: var(--c-main-bg);
+    border: 5px solid var(--c-border);
     border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    overflow: hidden;
+    box-shadow: inset 4px 4px 0px var(--c-black-op20);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: center;
+    width: 1600px;
+    height: 90vh;
+    margin: 0.8rem;
+    flex-grow: 0;
+    overflow-y: auto;
+    transition: all 0.5s ease;
 }
 
-/* ===== ロゴデザイン ===== */
-.logo {
-    font-size: 1.75rem;
-    font-weight: bold;
-    color: white;
-    text-shadow: 2px 2px 0 #333;
-}
-.logo-accent {
-    color: #ffcb05; /* ポケモンイエロー */
-}
-
-/* ===== ヘッダーとフッター ===== */
 #app-header {
+    background: var(--c-header-bg);
+    border-bottom: 2px solid var(--c-border);
+    padding: 0.75rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: rgba(40, 40, 40, 0.5);
-    border-bottom: 4px solid #333;
-    flex-shrink: 0;
-    z-index: 20;
-    padding: 1rem 2rem;
-}
-#app-footer {
-    background-color: rgba(40, 40, 40, 0.5);
-    flex-shrink: 0;
-    border-top: 2px solid #333;
-    text-align: center;
-    padding: 1rem;
-}
-#app-footer p {
-    color: #ffffff;
-    text-shadow: 1px 1px 0 #000;
-}
-.header-button {
-    background-color: rgba(127, 140, 141, 0.8);
-    padding: 0.5rem 1rem;
-    border: 2px solid #333;
-    border-radius: 8px;
-    box-shadow: 0 2px 0 #333;
-    color: white;
-    font-weight: bold;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-.header-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 0 #333;
-}
-.header-button:active {
-    transform: translateY(1px);
-    box-shadow: 0 1px 0 #333;
+    transition: all 0.5s ease;
 }
 
-/* ===== メインコンテンツエリア ===== */
-#main-content {
-    background-color: rgba(232, 245, 233, 0.85);
-    backdrop-filter: blur(5px);
-    border: 4px solid #333;
-    border-radius: 10px;
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
-    margin: 20px;
-    flex-grow: 1;
-    overflow: hidden;
+.logo {
+    font-size: 1.5rem;
+    color: var(--c-white);
+    text-shadow: 2px 2px 0 var(--c-border);
+    transition: all 0.5s ease;
+}
+
+.logo-accent {
+    color: var(--c-accent);
+    transition: all 0.5s ease;
+}
+
+.header-button {
+    background-color: var(--c-border);
+    color: var(--c-white);
+    padding: 0.3rem 0.8rem;
+    border: 2px solid var(--c-border);
+    border-radius: 4px;
+    box-shadow: inset -2px -2px 0px var(--c-black-op50);
+    transition: all 0.1s;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.header-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+}
+
+#app-footer {
+    background: var(--c-header-bg);
+    border-top: 2px solid var(--c-border);
+    padding: 0.5rem;
+    text-align: center;
+    color: var(--c-footer-text);
+    text-shadow: 1px 1px 0 var(--c-black);
+    transition: all 0.5s ease;
+}
+
+#p-footer {
+    font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   3. 各画面のデフォルトスタイル
+   ========================================================================== */
+
+#loader-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--c-main-bg);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
+    z-index: 100;
+    transition: opacity 0.5s ease;
+}
+
+#loader-overlay p {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    color: var(--c-text);
+    letter-spacing: 4px;
+}
+
+.pokeball-loader {
+    width: 60px; height: 60px;
+    background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: spin 1.5s linear infinite;
+}
+
+.selection-title {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--c-text);
+}
+
+.mode-selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.mode-button {
+    border: 4px solid var(--c-border);
+    border-radius: 8px;
+    box-shadow: 4px 4px 0 var(--c-border);
+    color: var(--c-white);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 400px;
+    transition: all 0.1s ease;
+    cursor: pointer;
+    position: relative;
+    text-shadow: 2px 2px 0px var(--c-black-op40);
+}
+
+.mode-button:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+}
+
+.mode-button h3 { font-size: 1.5rem; }
+.mode-button p { font-size: 0.9rem; color: var(--c-white-op90); margin-top: 0.5rem; }
+
+.score-button { background-color: var(--c-btn-score); }
+.classic-button { background-color: var(--c-btn-classic); }
+.stats-button { background-color: var(--c-btn-stats); }
+
+#guess-input {
+    background-color: var(--c-white);
+    border: 2px solid var(--c-border);
+    border-radius: 4px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    flex-grow: 1;
+    font-family: 'DotGothic16', sans-serif;
+    color: var(--c-text);
+}
+#guess-input::placeholder { color: var(--c-placeholder-text); }
+
+
+.guess-button {
+    background-color: var(--c-btn-guess);
+    border: 2px solid var(--c-border);
+    border-radius: 4px;
+    box-shadow: inset -2px -2px 0px var(--c-black-op50);
+    color: var(--c-white);
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+}
+
+.guess-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+}
+
+#results-area {
+    border: 2px solid var(--c-black-op30);
+    background: var(--c-black-op10);
+    border-radius: 4px;
+    overflow-y: scroll;
+    padding: 0.5rem;
+}
+
+#result-header, .result-row {
+    display: grid;
+    gap: 0.5rem;
+    align-items: center;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 0.25rem;
+}
+
+#result-header {
+    font-weight: bold;
+    border-bottom: 2px solid var(--c-black-op30);
+    margin-bottom: 0.5rem;
+}
+
+.result-row {
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.result-row > div {
+    padding: 0.5rem 0.2rem;
+    border-radius: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-row img {
+    width: 32px; height: 32px;
+    image-rendering: pixelated;
+    margin: 0 auto;
+}
+
+.result-header-classic, .result-row-classic {
+    grid-template-columns: 40px 1.2fr 0.4fr repeat(2, 0.7fr) repeat(3, 1fr) repeat(2, 0.8fr) 0.8fr repeat(2, 0.6fr) 0.5fr 0.6fr 0.5fr;
+    word-break: break-all;
+}
+.result-row-stats, .result-header-stats {
+    grid-template-columns: 40px 1.5fr repeat(6, 1fr);
+}
+
+.bg-green { background-color: var(--c-correct) !important; color: var(--c-white); }
+.bg-yellow { background-color: var(--c-partial) !important; color: var(--c-text); }
+.bg-gray { background-color: var(--c-wrong) !important; color: var(--c-white); }
+
+#score-screen { text-align: center; }
+.score-title { font-size: 2.5rem; margin-bottom: 1rem; }
+.final-score-display { font-size: 4rem; }
+
+/* ==========================================================================
+   4. ゲームモード専用スタイル (`body.game-mode-active`)
+   ========================================================================== */
+
+body.game-mode-active {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    background-color: var(--c-game-bg);
+    background-image: url('https://www.transparenttextures.com/patterns/rocky-wall.png');
+    color: var(--c-game-text);
+}
+
+body.game-mode-active #theme-container {
+    background: var(--c-game-main-bg);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 50px var(--c-game-shadow-cyan);
+    border: 4px solid var(--c-game-border);
+}
+
+body.game-mode-active #app-header {
+    background: transparent;
+    border-bottom: 1px solid var(--c-game-accent-gold-op30);
+    padding: 1rem 2.5rem;
+}
+
+body.game-mode-active .logo {
+    font-family: 'Cinzel', serif;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--c-game-accent-gold);
+    text-shadow: 0 0 8px var(--c-game-accent-gold), 0 0 12px var(--c-game-accent-gold);
+}
+
+body.game-mode-active .logo-accent {
+    color: var(--c-game-accent-cyan);
+    text-shadow: 0 0 8px var(--c-game-accent-cyan), 0 0 12px var(--c-game-accent-cyan);
+}
+
+body.game-mode-active .header-button {
+    background: transparent;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid var(--c-game-border-light);
+    color: var(--c-game-text-light);
+    font-weight: bold;
+    box-shadow: none;
+}
+
+body.game-mode-active .header-button:hover {
+    border-color: var(--c-game-accent-cyan);
+    color: var(--c-game-accent-cyan);
+    box-shadow: 0 0 10px var(--c-game-accent-cyan);
+}
+
+body.game-mode-active #app-footer {
+    background: transparent;
+    border-top: 1px solid var(--c-game-accent-gold-op30);
+    text-shadow: none;
+}
+
+body.game-mode-active #app-footer p { color: var(--c-game-text-dark); }
+
+body.game-mode-active #main-content {
+    background: transparent;
+    border: 2px solid var(--c-game-border-medium);
+    border-radius: 2px;
+    margin: 20px;
+    box-shadow: none;
+    justify-content: flex-start;
+    overflow: hidden;
 }
 
 #game-container {
     display: grid;
     grid-template-rows: min-content min-content min-content min-content 1fr;
-    grid-template-areas:
-        "info"
-        "status"
-        "controls"
-        "message"
-        "results";
-    width: 100%;
-    height: 100%;
+    grid-template-areas: "info" "status" "controls" "message" "results";
+    width: 90%; height: 90%;
     gap: 1rem;
+    align-self: center;
 }
+
 #game-info-area { grid-area: info; text-align: center; }
 #game-status { grid-area: status; display: flex; justify-content: space-around; font-size: 1.25rem; }
 #game-controls { grid-area: controls; position: relative; width: 100%; max-width: 500px; margin: 0 auto; }
+#message-area { grid-area: message; text-align: center; min-height: 1.5rem; font-weight: bold; }
 #input-area { display: flex; gap: 0.5rem; }
-#message-area { grid-area: message; text-align: center; min-height: 1.5rem; font-weight: bold;}
-#results-area {
-    grid-area: results;
-    overflow: hidden;
+
+body.game-mode-active #message-area { color: var(--c-game-accent-cyan); }
+
+body.game-mode-active #guess-input {
+    background: var(--c-black-op40);
+    border: 1px solid var(--c-game-border-light);
+    border-radius: 2px;
+    color: var(--c-white);
+    padding: 0.8rem 1.2rem;
+    transition: all 0.3s ease;
+}
+
+body.game-mode-active #guess-input:focus {
+    outline: none;
+    border-color: var(--c-game-accent-cyan);
+    box-shadow: 0 0 8px var(--c-game-accent-cyan);
+}
+
+body.game-mode-active .guess-button,
+body.game-mode-active .action-button,
+body.game-mode-active .back-button {
+    border: 1px solid var(--c-game-border-light);
+    color: var(--c-game-text-light);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0.8rem 1.8rem;
+    background: var(--c-black-op20);
+    box-shadow: none;
+}
+
+body.game-mode-active .guess-button:hover,
+body.game-mode-active .action-button:hover,
+body.game-mode-active .back-button:hover {
+    box-shadow: 0 0 10px var(--c-game-accent-cyan);
+    color: var(--c-game-accent-cyan);
+    border-color: var(--c-game-accent-cyan);
+}
+
+body.game-mode-active .guess-button:active,
+body.game-mode-active .action-button:active,
+body.game-mode-active .back-button:active {
+    transform: none;
+}
+
+body.game-mode-active #results-area {
     display: flex;
     flex-direction: column;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    min-height: 0;
+    height: 100%; min-height: 0;
+    border: 1px solid var(--c-game-border);
+    background-color: var(--c-black-op20);
+    padding: 0;
+    overflow: hidden;
 }
 
-/* ヘッダーの共通スタイル */
-#result-header {
+body.game-mode-active #result-header {
     flex-shrink: 0;
     font-weight: bold;
-    color: #424242;
-    padding: 0.5rem; /* 上下左右のpaddingを基本設定 */
-    display: grid;
-    /* ▼ 修正: 履歴のpadding-right(0.5rem)とスクロールバーの幅(12px)を足して、右paddingを正確に計算 */
-    padding-right: calc(0.5rem + 12px); 
-    gap: 0.5rem;
-    text-align: center;
+    color: var(--c-game-accent-gold);
+    padding: 0.5rem;
     font-size: 0.75rem;
-    background-color: rgba(0,0,0,0.05);
-    align-items: center; /* ▼ 追加: アイテムを垂直方向中央に配置し、履歴行と揃える */
+    background-color: var(--c-black-op30);
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
-/* クラシック・スコアアタックモードのヘッダー列幅 */
-.result-header-classic {
-    grid-template-columns: 0.6fr 1.5fr repeat(6, 1fr);
-}
-
-/* 種族値アタックモードのヘッダー列幅 */
-.result-header-stats {
-    grid-template-columns: 0.6fr 1.5fr repeat(6, 1fr);
-}
-
-
-#result-history {
-    overflow-y: scroll; /* autoからscrollへ変更 */
+body.game-mode-active #result-history {
+    overflow-y: scroll;
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
-.result-row {
-    display: grid;
-    gap: 0.5rem;
-    align-items: center;
-    text-align: center;
+
+body.game-mode-active .result-row {
     font-size: 0.875rem;
-    padding: 0.25rem 0.5rem; /* 上下のパディングを少し減らす */
-    border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.25rem 0.5rem;
+    border-bottom: 1px solid var(--c-game-row-border);
+    background: transparent;
+    margin-bottom: 0;
+    border-radius: 0;
 }
 
-/* クラシック・スコアアタックモードの履歴列幅 */
-.result-row-classic {
+body.game-mode-active .result-header-classic,
+body.game-mode-active .result-row-classic {
+    grid-template-columns: 0.6fr 1.2fr 0.4fr repeat(2, 0.7fr) repeat(3, 1fr) repeat(2, 0.8fr) 0.8fr repeat(2, 0.6fr) 0.5fr 0.6fr 0.5fr;
+    word-break: break-all;
+}
+
+body.game-mode-active .result-row-stats,
+body.game-mode-active .result-header-stats {
     grid-template-columns: 0.6fr 1.5fr repeat(6, 1fr);
 }
-/* 種族値アタックモードの履歴列幅 */
-.result-row-stats {
-    grid-template-columns: 0.6fr 1.5fr repeat(6, 1fr);
+
+body.game-mode-active .bg-green { background-color: var(--c-game-correct-bg) !important; color: var(--c-white); }
+body.game-mode-active .bg-yellow { background-color: var(--c-game-partial-bg) !important; color: var(--c-white); }
+body.game-mode-active .bg-gray { background-color: var(--c-game-wrong-bg) !important; color: var(--c-game-text-medium); }
+
+body.game-mode-active .score-card {
+    background-color: var(--c-black-op30);
+    border: 1px solid var(--c-game-border-medium);
+    padding: 2rem;
 }
 
+body.game-mode-active .score-title { color: var(--c-white); }
 
-.result-row img {
-    width: 32px;
-    height: 32px;
-    margin: 0 auto; /* 中央寄せ */
+body.game-mode-active #score-screen .mode-button {
+    border: 2px solid var(--c-game-border-dark);
+    background: transparent;
+    color: var(--c-game-text-medium);
+    box-shadow: none;
+    max-width: 400px;
 }
 
+body.game-mode-active #score-screen .mode-button:hover {
+    border-color: var(--c-game-accent-gold);
+    color: var(--c-game-accent-gold);
+    box-shadow: 0 0 20px var(--c-game-shadow-gold), inset 0 0 10px var(--c-game-shadow-gold-inset);
+}
 
-.selection-title {
-    font-size: 1.75rem;
+.text-red {
+    color: var(--c-arrow-up-red);
     font-weight: bold;
-    color: #212121;
-    margin-bottom: 1.5rem;
-    text-align: center;
 }
 
-h2, h3, #game-status, .font-bold { color: #212121; }
-p, .score-card p { color: #424242; }
-
-.mode-button {
-    border: 2px solid #333;
-    border-radius: 8px;
-    transition: all 0.2s;
-    box-shadow: 0 4px 0 #333;
-    cursor: pointer;
+.text-blue {
+    color: var(--c-arrow-down-blue);
     font-weight: bold;
-    padding: 1rem;
-    color: white;
-    backdrop-filter: blur(5px);
-    position: relative;
-    text-align: center;
 }
-.mode-button:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #333; }
-.mode-button:active { transform: translateY(2px); box-shadow: 0 2px 0 #333; }
-.mode-button h3 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem; font-family: DotGothic16; }
-.mode-button p { font-size: 1rem; font-weight: normal; font-family: DotGothic16; color: rgba(255, 255, 255, 0.9); }
-.classic-button, #play-again-button { background-color: rgba(91, 192, 222, 0.8); }
-.score-button { background-color: rgba(92, 184, 92, 0.8); }
-.stats-button { background-color: rgba(240, 173, 78, 0.8); }
 
-.guess-button, .action-button, .back-button {
-    border: 2px solid #333;
-    border-radius: 8px;
-    transition: all 0.2s;
-    box-shadow: 0 4px 0 #333;
-    cursor: pointer;
-    font-weight: bold;
-    color: white;
-    padding: 0.75rem 1.5rem;
+.form-name {
+    font-size: 0.5em;
+    font-weight: normal;
 }
-.guess-button:hover, .action-button:hover, .back-button:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #333; }
-.guess-button:active, .action-button:active, .back-button:active { transform: translateY(2px); box-shadow: 0 2px 0 #333; }
-.guess-button { background-color: rgba(217, 83, 79, 0.8); }
-.action-button { background-color: rgba(155, 89, 182, 0.8); }
-.back-button { background-color: rgba(127, 140, 141, 0.8); }
+
+body.game-mode-active .form-name {
+    color: var(--c-game-text-medium);
+}
+
+/* ==========================================================================
+   5. モーダルウィンドウ & 情報ボタン
+   ========================================================================== */
 
 .info-button {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid white;
-    background-color: rgba(0,0,0,0.3);
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
+    top: 10px; right: 10px;
+    width: 28px; height: 28px;
+    border-radius: 2px;
+    border: 2px solid var(--c-game-border-dark);
+    background-color: var(--c-black-op30);
+    color: var(--c-game-text-medium);
+    font-weight: bold; font-size: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
     z-index: 10;
 }
-.info-button:hover { background-color: rgba(0,0,0,0.5); }
 
-#guess-input {
-    background-color: #ffffff;
-    border: 2px solid #333;
-    border-radius: 8px;
-    color: #333;
-    flex-grow: 1;
-    padding: 0.75rem;
-    font-size: 1rem;
+.info-button:hover {
+    border-color: var(--c-game-accent-gold);
+    color: var(--c-game-accent-gold);
 }
-#guess-input:focus { outline: none; border-color: #5bc0de; }
-
-#suggestions-box {
-    position: absolute;
-    width: 100%;
-    max-height: 15rem;
-    overflow-y: auto;
-    background-color: #ffffff;
-    border: 2px solid #333;
-    border-radius: 8px;
-    color: #333;
-    z-index: 30;
-    margin-top: 0.25rem;
-}
-.suggestion-item {
-    padding: 0.75rem;
-    cursor: pointer;
-}
-.suggestion-item:hover { background-color: #e0e0e0; }
 
 #modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.75);
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: var(--c-game-main-bg);
     z-index: 40;
     display: flex;
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.3s ease;
 }
 
 #modal {
-    width: 90%;
-    max-width: 600px;
-    background-color: #e8f5e9;
-    border: 4px solid #333;
-    color: #333;
-    border-radius: 10px;
+    width: 90%; max-width: 600px;
+    background: var(--c-modal-bg);
+    border: 2px solid var(--c-game-border-light);
+    color: var(--c-game-text);
     z-index: 50;
     padding: 2rem;
     position: relative;
-}
-#modal-content h3 { font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #333; }
-#modal-content p { margin-bottom: 0.5rem; }
-#modal-content ul { list-style-position: inside; margin-left: 1rem; }
-#modal-content li { margin-bottom: 0.25rem; }
-#modal-close-button { position: absolute; top: 1rem; right: 1rem; font-size: 2rem; color: #333; background: none; border: none; cursor: pointer; }
-#modal-close-button:hover { color: #d9534f; }
-
-.score-card {
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 8px;
-    border: 1px solid rgba(0,0,0,0.1);
-    padding: 2rem;
-    text-align: center;
+    border-radius: 2px;
 }
 
-/* 結果表示の色分け */
-.bg-green-500 { background-color: #28a745 !important; color: white; }
-.bg-yellow-500 { background-color: #ffc107 !important; color: #333; }
-.bg-gray-700 { background-color: #6c757d !important; color: white; }
+#modal-close-button {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    font-size: 2rem;
+    color: var(--c-game-text-dark);
+    background: none; border: none;
+    cursor: pointer;
+}
+#modal-close-button:hover { color: var(--c-game-accent-gold); }
 
+#modal-content h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--c-game-accent-gold);
+    color: var(--c-game-accent-gold);
+}
+
+#modal-content p, #modal-content li { color: var(--c-game-text-light); }
+#modal-content a { color: var(--c-game-accent-cyan); }
+
+.color-chip {
+    display: inline-block;
+    width: 1em; height: 1em;
+    border: 1px solid var(--c-border);
+    vertical-align: middle;
+    margin-right: 0.5em;
+}
+
+/* ==========================================================================
+   6. サジェストボックス
+   ========================================================================== */
+#suggestions-box {
+    position: absolute;
+    top: 50px; left: 0;
+    width: 79%;
+    background-color: var(--c-white);
+    border: 1.5px solid var(--c-suggestion-border);
+    border-radius: 7.5px;
+    box-shadow: 0 4px 8px var(--c-black-op10);
+    z-index: 10;
+    max-height: 245px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--c-suggestion-border);
+    color: var(--c-text);
+}
+
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background-color: var(--c-suggestion-bg-hover); }
+
+.suggestion-sprite {
+    width: 32px; height: 32px;
+    margin-right: 12px;
+    image-rendering: pixelated;
+}
+
+body.game-mode-active #suggestions-box {
+    background-color: var(--c-modal-bg);
+    border-color: var(--c-game-border-light);
+    top: 60px;
+}
+body.game-mode-active .suggestion-item {
+    border-bottom-color: var(--c-game-border);
+    color: var(--c-game-text);
+}
+body.game-mode-active .suggestion-item:hover {
+    background-color: var(--c-game-border);
+}
+
+/* ==========================================================================
+   7. 汎用クラス & アニメーション
+   ========================================================================== */
 
 .hidden { display: none !important; }
-#mode-selection-screen, #game-container, #score-screen, .result-row {
-    animation: fadeIn 0.5s ease-out forwards;
+.fade-in { animation: fadeIn 0.5s ease-out forwards; }
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
-#result-history::-webkit-scrollbar, #suggestions-box::-webkit-scrollbar { width: 12px; }
-#result-history::-webkit-scrollbar-track, #suggestions-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
-#result-history::-webkit-scrollbar-thumb, #suggestions-box::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; border: 3px solid #e8f5e9; }
-
-/* ▼ 修正: ヘッダー文字幅の個別調整 */
-/* letter-spacingだと「進化」が「進 化」のようにバラけるため、transformで単語ごと縮小します */
-.header-name, .header-gen, .header-type1, .header-type2, .header-height, .header-weight, .header-evo,
-.header-attack, .header-defense, .header-sp-attack, .header-sp-defense, .header-speed {
-    display: inline-block; /* transformを適用するために必要 */
-    white-space: nowrap; /* 改行を防ぐ */
+@keyframes rotate-phone {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(-90deg); }
+    100% { transform: rotate(-90deg); }
 }
 
-/* 2文字の単語 */
-.header-gen, .header-height, .header-weight, .header-evo,
-.header-attack, .header-defense, .header-sp-attack, .header-sp-defense {
-    transform: scaleX(1.0);
+/* ==========================================================================
+   8. スクロールバー
+   ========================================================================== */
+
+#result-history::-webkit-scrollbar,
+#suggestions-box::-webkit-scrollbar {
+    width: 12px;
 }
 
-/* 3文字以上の単語 */
-.header-name, .header-speed {
-    transform: scaleX(1.0);
+#result-history::-webkit-scrollbar-track { background: var(--c-game-scroll-track); }
+#result-history::-webkit-scrollbar-thumb { background: var(--c-game-scroll-thumb); border: 2px solid var(--c-game-scroll-track); }
+
+#suggestions-box::-webkit-scrollbar { width: 7.5px; }
+#suggestions-box::-webkit-scrollbar-track { background: var(--c-scroll-track); border-radius: 10px; }
+#suggestions-box::-webkit-scrollbar-thumb { background: var(--c-scroll-thumb); border-radius: 10px; }
+#suggestions-box::-webkit-scrollbar-thumb:hover { background: var(--c-scroll-thumb-hover); }
+
+/* ==========================================================================
+   9. レスポンシブ対応 (縦画面表示時の案内)
+   ========================================================================== */
+
+#orientation-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: var(--c-orientation-bg);
+    color: var(--c-white);
+    z-index: 200;
+    font-family: 'DotGothic16', sans-serif;
 }
 
-.header-type1, .header-type2 {
-    transform: scaleX(1.0); /* タイプ1/2は文字数が多いため、より縮小 */
+.orientation-message {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%; height: 100%;
+    text-align: center;
 }
 
-.header-sprite {
-    margin-left : 15px;
+.orientation-message p { font-size: 1.2rem; line-height: 1.8; }
+
+.phone-icon {
+    width: 64px; height: 100px;
+    border: 3px solid var(--c-white);
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    position: relative;
+    animation: rotate-phone 1.5s ease-in-out infinite;
 }
 
-.header-name {
-    margin-left : 10px;
+.phone-icon::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 20px; height: 4px;
+    background-color: var(--c-white);
+    border-radius: 2px;
 }
 
-.header-gen {
-    margin-left : 5px;
-}
-
-.header-type1 {
-    margin-left : 0px;
-}
-
-.header-type2 {
-    margin-right : 5px;
-}
-
-.header-height {
-    margin-right : 10px;
-}
-
-.header-weight {
-    margin-right : 12.5px;
-}
-
-.header-evo {
-    margin-right : 15px;
-}
-
-.header-hp {
-    margin-left : 7.5px;
-}
-
-.header-attack {
-    margin-right : 0px;
-}
-
-.header-defense {
-    margin-right : 5px;
-}
-
-.header-sp-attack {
-    margin-right : 10px;
-}
-
-.header-sp-defense {
-    margin-right : 12.5px;
-}
-
-.header-speed {
-    margin-right : 15px;
+@media screen and (max-height: 850px) and (orientation: portrait) {
+    #theme-container, #loader-overlay {
+        display: none;
+    }
+    #orientation-overlay {
+        display: block;
+    }
 }

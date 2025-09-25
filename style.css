@@ -337,7 +337,7 @@ body {
 .bg-gray { background-color: var(--c-wrong) !important; color: var(--c-white); }
 
 #score-screen { text-align: center; }
-.score-title { font-size: 2.5rem; margin-bottom: 1rem; }
+.score-title { font-size: 2.5rem; margin-bottom: 5rem; }
 .final-score-display { font-size: 4rem; }
 
 /* ==========================================================================
@@ -644,6 +644,419 @@ body.game-mode-active .form-name {
     margin-right: 0.5em;
 }
 
+#result-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(38, 50, 56, 0.8);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+}
+
+#result-modal {
+    background: #37474f;
+    border: 2px solid var(--c-game-border-light, #78909c);
+    color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+#result-modal-verdict {
+    position: static;
+    transform: none;
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    opacity: 1;
+}
+
+.verdict-correct {
+    color: #fff;
+    text-shadow: none;
+}
+
+.verdict-incorrect {
+    color: #fff;
+    text-shadow: none;
+}
+
+#result-modal-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: center; /* 水平方向の中央揃え */
+    align-items: center;     /* 垂直方向の中央揃え */
+    gap: 1.5rem;             /* 画像と名前の間のスペース */
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--c-game-border-light);
+    width: 100%;
+}
+
+.verdict-prefix {
+    font-size: 1.8rem;
+    color: var(--c-game-text-medium);
+    align-self: flex-end;
+    margin-right: 1.5rem;
+}
+
+.verdict-suffix {
+    font-size: 1.8rem;
+    color: var(--c-game-text-medium);
+    align-self: flex-end;
+    margin-left: 1.5rem;
+}
+
+.pokemon-name-display {
+    text-align: center; /* 名前を左揃えに */
+}
+
+.pokemon-name-display span {
+    display: block; /* spanをブロック要素にして改行させる */
+}
+
+.profile-header img {
+    width: 100px;
+    height: 100px;
+    image-rendering: pixelated;
+}
+
+#play-again-button {
+    margin-top: 3rem;
+    font-size: large;
+    font-weight: bold;
+    background-color: #53a2d0;
+    border: 4px solid var(--c-border);
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--c-border);
+    color: var(--c-white);
+    padding: 1.0rem;
+    width: 30%;
+    max-width: 200px;
+    transition: all 0.1s ease;
+    cursor: pointer;
+    position: relative;
+    text-shadow: none;
+}
+
+#return-to-menu-button {
+    margin-top: 3rem;
+    font-size: large;
+    font-weight: bold;
+    background-color: var(--c-btn-score);
+    border: 4px solid var(--c-border);
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--c-border);
+    color: var(--c-white);
+    padding: 1.0rem;
+    width: 30%;
+    max-width: 200px;
+    transition: all 0.1s ease;
+    cursor: pointer;
+    position: relative;
+    text-shadow: none;
+}
+
+.sprite-container {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-header h2 {
+    font-size: 1.5em;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.profile-header .form-name {
+    font-size: 0.5em;
+    color: #bbb;
+}
+
+.profile-content-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+}
+
+.profile-left h2 {
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+.profile-left .form-name {
+    font-size: 0.5em;
+    color: #888;
+}
+
+[data-field="types"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+.type-badge {
+    display: inline-block;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    background-color: #a8a878;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    text-align: center;
+}
+
+.profile-left dl, .profile-right dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+    align-items: center;
+}
+.profile-left dt {
+    font-weight: bold;
+    color: #fff;
+}
+
+.profile-right dt {
+    font-weight: bold;
+    color: #ccc;
+}
+
+.stats-list dd {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.stat-bar-bg {
+    flex-grow: 1;
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    height: 0.8rem;
+}
+.stat-bar {
+    height: 100%;
+    border-radius: 4px;
+    background-color: #4A90E2;
+    transition: width 0.5s ease-out;
+}
+
+
+/* タイプと特性の2つ目の値は、1つ目の値のすぐ下に配置されるように調整 */
+[data-field="type2"], [data-field="ability2"], [data-field="eggGroup2"] {
+    margin-top: -0.5rem; /* 上の行に近づける */
+}
+
+/* 1. 種族値バーの色を統一 */
+.stat-bar {
+    background-color: #4A90E2; /* 明るい青色に統一 */
+}
+
+.stats-list {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.4rem 0.6rem;
+    align-items: center;
+}
+
+/* 3. タイプボックスの横幅を調整 */
+.type-badge {
+    padding: 0.2em 0.6em; /* 横の余白を少し狭く */
+    min-width: 20px;      /* 最小幅を設定 */
+}
+
+.grid-label {
+    font-weight: bolder;
+    color: #aaa;
+    text-align: left;
+    font-size: 0.9em;
+    align-self: left;
+}
+
+.grid-value {
+    font-size: 0.9em;
+    text-align: center;
+}
+
+/* 縦2行を連結するラベルのスタイル */
+.grid-label.span-2-rows {
+    grid-row: span 2;
+    align-self: center; /* 連結されたセル内で上下中央に配置 */
+}
+
+.profile-left img {
+    width: 100px;
+    height: 100px;
+    image-rendering: pixelated;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    grid-column: 1 / -1; /* 画像をグリッド全体に広げて中央配置 */
+    justify-self: center;
+}
+
+.type-badge {
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+    text-align: center;
+    width: 100%;
+}
+
+.profile-separator {
+    width: 1px;
+    background-color: var(--c-game-border-light);
+}
+
+.profile-left {
+    display: grid;
+    grid-template-columns: auto 1.2fr auto 1fr;
+    gap: 0.67rem 1rem;
+    align-items: center;
+    min-width: 0;
+    flex: 12;
+    padding: 0 0.5rem 0 1.5rem;
+}
+
+.profile-right {
+    border: none;
+    border-radius: 8px;
+    padding: 0 1.0rem 0 1.5rem;
+    background: transparent;
+    flex: 9.5;
+    min-width: 0;
+}
+.profile-right h3 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: var(--c-game-text-light);
+}
+.stats-list {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.6rem 0.8rem;
+    align-items: center;
+}
+.stat-bar-bg {
+    flex-grow: 1;
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    height: 0.8rem;
+}
+.stat-bar {
+    height: 100%;
+    border-radius: 4px;
+    background-color: #4A90E2;
+    transition: width 0.5s ease-out;
+}
+.stats-list dd span {
+    display: inline-block;
+    width: 3ch;
+    text-align: right;
+}
+
+.result-modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+#result-modal-left-button {
+    font-size: large;
+    font-weight: bold;
+    background-color: #53a2d0;
+    border: 4px solid var(--c-border);
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--c-border);
+    color: var(--c-white);
+    padding: 1.0rem;
+    width: 30%;
+    max-width: 400px;
+    transition: all 0.1s ease;
+    cursor: pointer;
+    position: relative;
+    text-shadow: none;
+}
+
+#result-modal-right-button {
+    font-size: large;
+    font-weight: bold;
+    background-color: #64b46c;
+    border: 4px solid var(--c-border);
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--c-border);
+    color: var(--c-white);
+    padding: 1.0rem;
+    width: 30%;
+    max-width: 400px;
+    transition: all 0.1s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+/* 4. タイプごとの色設定 */
+.type-normal { background-color: #949495; }
+.type-fire { background-color: #E56B3E; }
+.type-water { background-color: #5184C4; }
+.type-electric { background-color: #F6D851; }
+.type-grass { background-color: #65A945; }
+.type-ice { background-color: #6DC7EA; }
+.type-fighting { background-color: #E09C3F; }
+.type-poison { background-color: #735198; }
+.type-ground { background-color: #9D7843; }
+.type-flying { background-color: #A2C2E6; }
+.type-psychic { background-color: #DC6B7C; }
+.type-bug { background-color: #9FA143; }
+.type-rock { background-color: #BFB888; }
+.type-ghost { background-color: #664970; }
+.type-dragon { background-color: #535CA7; }
+.type-steel { background-color: #6AA9C6; }
+.type-dark { background-color: #4D4948; }
+.type-fairy { background-color: #DAB5D4; }
+
+/* データの日本語名とCSSクラス名を合わせるための調整 */
+.type-ノーマル { background-color: #949495; }
+.type-ほのお { background-color: #E56B3E; }
+.type-みず { background-color: #5184C4; }
+.type-でんき { background-color: #F6D851; }
+.type-くさ { background-color: #65A945; }
+.type-こおり { background-color: #6DC7EA; }
+.type-かくとう { background-color: #E09C3F; }
+.type-どく { background-color: #735198; }
+.type-じめん { background-color: #9D7843; }
+.type-ひこう { background-color: #A2C2E6; }
+.type-エスパー { background-color: #DC6B7C; }
+.type-むし { background-color: #9FA143; }
+.type-いわ { background-color: #BFB888; }
+.type-ゴースト { background-color: #664970; }
+.type-ドラゴン { background-color: #535CA7; }
+.type-はがね { background-color: #6AA9C6; }
+.type-あく { background-color: #4D4948; }
+.type-フェアリー { background-color: #EE99AC; }
+
 /* ==========================================================================
    6. サジェストボックス
    ========================================================================== */
@@ -754,6 +1167,25 @@ body.game-mode-active .suggestion-item:hover {
 }
 
 .orientation-message p { font-size: 1.2rem; line-height: 1.8; }
+
+.phone-icon {
+    width: 64px; height: 100px;
+    border: 3px solid var(--c-white);
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    position: relative;
+    animation: rotate-phone 1.5s ease-in-out infinite;
+}
+
+.phone-icon::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 20px; height: 4px;
+    background-color: var(--c-white);
+    border-radius: 2px;
+}
 
 @media screen and (max-height: 850px) and (orientation: portrait) {
     #theme-container, #loader-overlay {

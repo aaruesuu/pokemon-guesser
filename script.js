@@ -8,6 +8,7 @@ const scoreAttackButton = document.getElementById('score-attack-button');
 const baseStatsModeButton = document.getElementById('base-stats-mode-button');
 const guessButton = document.getElementById('guess-button');
 const nextQuestionButton = document.getElementById('next-question-button');
+const returnToMenuButton = document.getElementById('return-to-menu-button');
 const backToMenuButton = document.getElementById('back-to-menu-button');
 const playAgainButton = document.getElementById('play-again-button');
 const homeButton = document.getElementById('home-button');
@@ -24,10 +25,11 @@ const inputArea = document.getElementById('input-area');
 const suggestionsBox = document.getElementById('suggestions-box');
 const finalScoreSpan = document.getElementById('final-score');
 const gameTitle = document.getElementById('game-title');
-const gameDescription = document.getElementById('game-description');
 const gameStatus = document.getElementById('game-status');
 const modalOverlay = document.getElementById('modal-overlay');
 const modalContent = document.getElementById('modal-content');
+const resultModalOverlay = document.getElementById('result-modal-overlay');
+const resultModal = document.getElementById('result-modal');
 
 // --- グローバル変数と定数 ---
 const allPokemonNames = Object.keys(allPokemonData);
@@ -56,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initGame();
     });
     const backToMenu = () => switchScreen('mode-selection-screen');
+    returnToMenuButton.addEventListener('click', backToMenu);
     backToMenuButton.addEventListener('click', backToMenu);
     playAgainButton.addEventListener('click', () => startGame(gameMode));
     homeButton.addEventListener('click', backToMenu);
@@ -79,8 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
             event.stopPropagation();
             const mode = event.target.dataset.mode;
             if (mode === 'classic') openModal('クラシックモード', '...');
-            else if (mode === 'scoreAttack') openModal('スコアアタック', '...');
-            else if (mode === 'baseStats') openModal('種族値アタック', '...');
+            else if (mode === 'scoreAttack') openModal('スコアモード', '...');
+            else if (mode === 'baseStats') openModal('種族値モード', '...');
         });
     });
     modalCloseButton.addEventListener('click', closeModal);
@@ -90,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ---------- ゲーム進行管理 ----------
 
-// 開始処理
 function startGame(mode) {
     gameMode = mode;
     resetGame();
@@ -99,7 +101,6 @@ function startGame(mode) {
     initGame();
 }
 
-// 出題処理
 function initGame() {
     if (answeredPokemonNames.size >= allPokemonNames.length) {
         answeredPokemonNames.clear();
@@ -113,14 +114,18 @@ function initGame() {
 
     correctPokemon = candidate;
     answeredPokemonNames.add(candidate.name);
+    
+    // デバッグ用
+    correctPokemon = Object.values(allPokemonData).find(p => p.name === "デオキシス（アタックフォルム）");
 
     guessInput.value = "";
     resultHistory.innerHTML = "";
     messageArea.textContent = "";
 }
 
-// 推測処理
 function handleGuess() {
+    if (gameOver) return; // ゲームオーバーなら処理しない
+
     const guessRaw = guessInput.value.trim();
     if (!guessRaw) return;
     let guessedPokemon = Object.values(allPokemonData).find(p => p.name === guessRaw);
@@ -138,58 +143,201 @@ function handleGuess() {
     }
 
     const comparisonResult = comparePokemon(guessedPokemon, correctPokemon);
+    if (!comparisonResult) return; 
+    
     renderResult(guessedPokemon, comparisonResult);
 
-    if (gameMode === 'classic') {
-        guessesLeft--;
-    } else {
+    if (gameMode !== 'classic') {
         totalGuesses++;
+    } else {
+        guessesLeft--;
     }
 
+    updateStatusUI();
+
     if (isCorrectAnswer(guessedPokemon, correctPokemon)) {
-        messageArea.textContent = "正解";
         endGame(true);
+    } else {
+        if (gameMode === 'classic' && guessesLeft <= 0) {
+            endGame(false);
+        }
     }
 
     suggestionsBox.classList.add('hidden');
-    
     guessInput.value = "";
     guessInput.focus();
 }
 
-// 終了処理
-function endGame() {
+function endGame(isWin) {
     gameOver = true;
     inputArea.classList.add('hidden');
-    backToMenuButton.classList.remove('hidden');
+
+    if (isWin) {
+        if (gameMode !== 'classic') {
+            correctCount++;
+            updateStatusUI();
+        }
+        showResultModal(correctPokemon, "正解");
+    } else {
+        showResultModal(correctPokemon, "残念");
+    }
 }
 
-// リセット処理
 function resetGame() {
     gameOver = false;
     guessesLeft = 5;
     correctCount = 0;
     totalGuesses = 0;
-    answeredPokemonNames.clear();
     messageArea.textContent = '';
     resultHistory.innerHTML = '';
     resultHeader.classList.add('hidden');
     inputArea.classList.remove('hidden');
     nextQuestionButton.classList.add('hidden');
+    returnToMenuButton.classList.remove('hidden');
     backToMenuButton.classList.add('hidden');
     updateStatusUI();
 }
 
-// スコア画面表示
 function showScoreScreen() {
     finalScoreSpan.textContent = totalGuesses;
     switchScreen('score-screen');
 }
 
+function showResultModal(pokemon, verdict) {
+    const verdictEl = resultModal.querySelector('#result-modal-verdict');
+    verdictEl.textContent = verdict;
+    verdictEl.className = (verdict === "正解") ? 'verdict-correct' : 'verdict-incorrect';
+
+    const setData = (field, value) => {
+        const el = resultModal.querySelector(`[data-field="${field}"]`);
+        if (el) el.textContent = value;
+    };
+    
+    resultModal.querySelector('[data-field="sprite"]').src = pokemon.sprite;
+    
+    const { main: mainName, form: formName } = formatDisplayName(pokemon.name);
+    setData('name', mainName);
+    setData('form', formName);
+
+    let nationalNo = pokemon.id;
+    if (pokemon.name.includes('（')) {
+        const baseName = pokemon.name.split('（')[0];
+        const allPokemonArray = Object.values(allPokemonData);
+        const candidateForms = allPokemonArray.filter(p => p.name.startsWith(baseName));
+        if (candidateForms.length > 0) {
+            const baseForm = candidateForms.reduce((minPokemon, currentPokemon) => {
+                return currentPokemon.id < minPokemon.id ? currentPokemon : minPokemon;
+            });
+            nationalNo = baseForm.id;
+        }
+    }
+    setData('nationalNo', nationalNo || '---');
+
+    setData('generation', pokemon.generation ? `${pokemon.generation}世代` : '不明');
+    setData('genderRatio', formatGenderRate(pokemon.genderRate));
+    setData('height', pokemon.height ? `${pokemon.height} m` : '不明');
+    setData('weight', pokemon.weight ? `${pokemon.weight} kg` : '不明');
+    setData('evolutionCount', pokemon.evolutionCount !== null ? pokemon.evolutionCount : '不明');
+    setData('formsSwitchable', pokemon.formsSwitchable ? '○' : '×');
+    setData('type1', pokemon.type1 || 'なし');
+    setData('type2', pokemon.type2 || 'なし');
+    setData('ability1', pokemon.ability1 || 'なし');
+    setData('ability2', pokemon.ability2 || 'なし');
+    setData('hiddenAbility', pokemon.hiddenAbility || 'なし');
+    setData('eggGroup1', pokemon.eggGroup1 || 'なし');
+    setData('eggGroup2', pokemon.eggGroup2 || 'なし');
+    
+    const stats = ['hp', 'attack', 'defense', 'spAttack', 'spDefense', 'speed'];
+    let totalStats = 0;
+    stats.forEach(stat => {
+        const value = pokemon.stats[stat];
+        totalStats += value;
+        setData(stat, value);
+        const bar = resultModal.querySelector(`[data-field="${stat}-bar"]`);
+        if(bar) {
+            const percentage = (value / 255) * 100;
+            bar.style.width = `${Math.min(percentage, 100)}%`;
+        }
+    });
+    
+    setData('totalStats', totalStats);
+    const totalBar = resultModal.querySelector('[data-field="totalStats-bar"]');
+    if(totalBar) {
+        const totalPercentage = (totalStats / 800) * 100;
+        totalBar.style.width = `${Math.min(totalPercentage, 100)}%`;
+    }
+
+    setupModalButtons(verdict);
+    resultModalOverlay.classList.remove('hidden');
+}
+
+function setupModalButtons(verdict) {
+    const leftButton = document.getElementById('result-modal-left-button');
+    const rightButton = document.getElementById('result-modal-right-button');
+
+    const newLeft = leftButton.cloneNode(true);
+    leftButton.parentNode.replaceChild(newLeft, leftButton);
+
+    const newRight = rightButton.cloneNode(true);
+    rightButton.parentNode.replaceChild(newRight, rightButton);
+
+    newLeft.classList.add('hidden');
+    newRight.classList.add('hidden');
+
+    if (verdict === '正解') {
+        if (gameMode === 'classic') {
+            newLeft.textContent = 'もう一度遊ぶ';
+            newLeft.onclick = () => {
+                resultModalOverlay.classList.add('hidden');
+                startGame(gameMode);
+            };
+            newLeft.classList.remove('hidden');
+
+            newRight.textContent = 'モード選択へ';
+            newRight.onclick = () => {
+                resultModalOverlay.classList.add('hidden');
+                switchScreen('mode-selection-screen');
+            };
+            newRight.classList.remove('hidden');
+        } else {
+            if (correctCount >= 3) {
+                newRight.textContent = 'スコア確認';
+                newRight.onclick = () => {
+                    resultModalOverlay.classList.add('hidden');
+                    showScoreScreen();
+                };
+                newRight.classList.remove('hidden');
+            } else {
+                newLeft.textContent = '次の問題へ';
+                newLeft.onclick = () => proceedToNextQuestion();
+                newLeft.classList.remove('hidden');
+            }
+        }
+    } else {
+        newLeft.textContent = 'もう一度遊ぶ';
+        newLeft.onclick = () => {
+            resultModalOverlay.classList.add('hidden');
+            startGame(gameMode);
+        };
+        newLeft.classList.remove('hidden');
+
+        newRight.textContent = 'モード選択へ';
+        newRight.onclick = () => {
+            resultModalOverlay.classList.add('hidden');
+            switchScreen('mode-selection-screen');
+        };
+        newRight.classList.remove('hidden');
+    }
+}
+
+function proceedToNextQuestion() {
+    resultModalOverlay.classList.add('hidden');
+    gameOver = false;
+    inputArea.classList.remove('hidden');
+    initGame();
+}
 
 // ---------- UI管理 ----------
-
-// 画面切り替え
 function switchScreen(targetScreen) {
     [modeSelectionScreen, gameContainer, scoreScreen].forEach(screen => {
         screen.classList.toggle('hidden', screen.id !== targetScreen);
@@ -197,7 +345,6 @@ function switchScreen(targetScreen) {
     });
 }
 
-// モードに応じたUI設定
 function setupUIForMode() {
     resultHeader.innerHTML = '';
     if (gameMode === 'classic' || gameMode === 'scoreAttack') {
@@ -239,7 +386,6 @@ function setupUIForMode() {
     updateStatusUI();
 }
 
-// ステータスUI更新
 function updateStatusUI() {
     if (gameMode === 'classic') {
         gameStatus.innerHTML = `<div>残り: <span id="guesses-left">${guessesLeft}</span> 回</div>`;
@@ -250,16 +396,18 @@ function updateStatusUI() {
     }
 }
 
-// 結果表示
 function renderResult(pokemon, comparisonResult) {
     const row = document.createElement('div');
     row.classList.add('result-row', 'fade-in');
+    
+    const { main: mainName, form: formName } = formatDisplayName(pokemon.name);
+    const displayName = formName ? `${mainName}<br><span class="form-name">${formName}</span>` : mainName;
 
     if (gameMode === 'baseStats') {
         row.className = 'result-row result-row-stats';
         row.innerHTML = `
             <div><img src="${pokemon.sprite}" alt="${pokemon.name}"></div>
-            <div class="font-bold">${formatDisplayName(pokemon.name)}</div>
+            <div class="font-bold">${displayName}</div>
             <div class="${comparisonResult.stats.hp.class}"><span>${pokemon.stats.hp}</span> <span class="${comparisonResult.stats.hp.symbolClass}">${comparisonResult.stats.hp.symbol}</span></div>
             <div class="${comparisonResult.stats.attack.class}"><span>${pokemon.stats.attack}</span> <span class="${comparisonResult.stats.attack.symbolClass}">${comparisonResult.stats.attack.symbol}</span></div>
             <div class="${comparisonResult.stats.defense.class}"><span>${pokemon.stats.defense}</span> <span class="${comparisonResult.stats.defense.symbolClass}">${comparisonResult.stats.defense.symbol}</span></div>
@@ -271,7 +419,7 @@ function renderResult(pokemon, comparisonResult) {
         row.className = 'result-row result-row-classic';
         row.innerHTML = `
             <div><img src="${pokemon.sprite}" alt="${pokemon.name}"></div>
-            <div class="font-bold">${formatDisplayName(pokemon.name)}</div>
+            <div class="font-bold">${displayName}</div>
             <div class="${comparisonResult.generation}">${pokemon.generation}</div>
             <div class="${comparisonResult.type1}">${pokemon.type1}</div>
             <div class="${comparisonResult.type2}">${pokemon.type2}</div>
@@ -291,7 +439,6 @@ function renderResult(pokemon, comparisonResult) {
     resultHistory.insertAdjacentElement('afterbegin', row);
 }
 
-// 正誤判定
 function handleInput() {
     const currentToken = ++suggestionRequestToken;
     const inputText = guessInput.value.trim();
@@ -301,7 +448,7 @@ function handleInput() {
     }
 
     const inputTextKana = normalizePokemonName(inputText);
-    const suggestions = allPokemonNames.filter(name => name.startsWith(inputTextKana)).slice(0, 50); // 候補が多すぎると重いので50件に制限
+    const suggestions = allPokemonNames.filter(name => normalizePokemonName(name).startsWith(inputTextKana)).slice(0, 50);
     
     if (currentToken !== suggestionRequestToken) return;
 
@@ -334,43 +481,24 @@ function handleInput() {
 
 // ---------- データ処理 ----------
 
-// ポケモン名の正規化
 function normalizePokemonName(input) {
     if (!input) return "";
     let str = input;
-
-    // 全角→半角
     str = str.replace(/[！-～]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
-
-    // 平仮名→片仮名
     str = str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
-
-    // 小書き文字・濁点の正規化
     str = str.normalize("NFC");
-
-    // 記号・空白削除
     str = str.replace(/[\s・．\.\-＿_]/g, "");
-
-    // 括弧付きフォルム削除
-    str = str.replace(/（.*?）|\(.*?\)/g, "");
-
     return str.trim();
 }
 
-// 表示用名前フォーマット
 function formatDisplayName(name) {
     const match = name.match(/(.+?)（(.+)）/);
-
     if (match) {
-        const mainName = match[1]; // 例: "イルカマン"
-        const formName = match[2]; // 例: "ナイーブなすがた"
-        return `${mainName}<br><span class="form-name">（${formName}）</span>`;
+        return { main: match[1], form: `（${match[2]}）` };
     }
-
-    return name;
+    return { main: name, form: '' };
 }
 
-// 正誤判定
 function isCorrectAnswer(guessed, correct) {
     if (!guessed || !correct) return false;
     if (guessed.id === correct.id) return true;
@@ -378,22 +506,22 @@ function isCorrectAnswer(guessed, correct) {
     return false;
 }
 
-// ポケモン情報比較（矢印の色分け対応版）
 function comparePokemon(guessed, correct) {
-    // 数値比較のためのヘルパー関数
+    if (!guessed || !correct) {
+        console.error("comparePokemon was called with invalid data:", { guessed, correct });
+        return; 
+    }
+
     const createNumericComparison = (guessedValue, correctValue) => {
         let symbol = '';
-        let symbolClass = ''; // 矢印の色クラスを保持する変数
-
+        let symbolClass = '';
         if (guessedValue > correctValue) {
             symbol = '▼';
-            symbolClass = 'text-blue'; // ▼ は青
+            symbolClass = 'text-blue';
         } else if (guessedValue < correctValue) {
             symbol = '▲';
-            symbolClass = 'text-red';  // ▲ は赤
+            symbolClass = 'text-red';
         }
-        // 値が同じ場合は symbol と symbolClass は空のまま
-
         return {
             class: guessedValue === correctValue ? 'bg-green' : 'bg-gray',
             symbol: symbol,
@@ -409,18 +537,12 @@ function comparePokemon(guessed, correct) {
         return result;
     } else {
         const result = {};
-
-        // --- 世代、進化段階、性別比率、FC ---
         result.generation = guessed.generation === correct.generation ? 'bg-green' : (Math.abs(guessed.generation - correct.generation) <= 1 ? 'bg-yellow' : 'bg-gray');
         result.evolutionCount = guessed.evolutionCount === correct.evolutionCount ? 'bg-green' : 'bg-gray';
         result.genderRate = guessed.genderRate === correct.genderRate ? 'bg-green' : 'bg-gray';
         result.formsSwitchable = guessed.formsSwitchable === correct.formsSwitchable ? 'bg-green' : 'bg-gray';
-
-        // --- タイプ ---
         result.type1 = guessed.type1 === correct.type1 ? 'bg-green' : (guessed.type1 === correct.type2 ? 'bg-yellow' : 'bg-gray');
         result.type2 = guessed.type2 === correct.type2 ? 'bg-green' : (guessed.type2 !== 'なし' && guessed.type2 === correct.type1 ? 'bg-yellow' : 'bg-gray');
-
-        // --- 特性 ---
         const correctAbilities = [correct.ability1, correct.ability2, correct.hiddenAbility].filter(a => a !== 'なし');
         ['ability1', 'ability2', 'hiddenAbility'].forEach(key => {
             if (guessed[key] === 'なし' && correct[key] === 'なし') result[key] = 'bg-green';
@@ -428,8 +550,6 @@ function comparePokemon(guessed, correct) {
             else if (guessed[key] !== 'なし' && correctAbilities.includes(guessed[key])) result[key] = 'bg-yellow';
             else result[key] = 'bg-gray';
         });
-
-        // --- タマゴグループ ---
         const correctEggGroups = [correct.eggGroup1, correct.eggGroup2].filter(g => g !== 'なし');
         ['eggGroup1', 'eggGroup2'].forEach(key => {
             if (guessed[key] === 'なし' && correct[key] === 'なし') result[key] = 'bg-green';
@@ -437,17 +557,13 @@ function comparePokemon(guessed, correct) {
             else if (guessed[key] !== 'なし' && correctEggGroups.includes(guessed[key])) result[key] = 'bg-yellow';
             else result[key] = 'bg-gray';
         });
-
-        // --- 数値比較（高さ、重さ、合計種族値）---
         result.height = createNumericComparison(guessed.height, correct.height);
         result.weight = createNumericComparison(guessed.weight, correct.weight);
         result.totalStats = createNumericComparison(guessed.totalStats, correct.totalStats);
-
         return result;
     }
 }
 
-//　性別比率のフォーマット
 function formatGenderRate(rate) {
     if (rate === -1) return '不明';
     if (rate === 0) return '♂のみ';

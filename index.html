@@ -86,9 +86,9 @@
                     <p class="score-subtitle">あなたのスコアは...</p>
                     <p class="final-score-display"><span id="final-score"></span> <span class="score-unit">回</span></p>
                     <div class="result-modal-buttons">
-                        <button id="play-again-button">もう一度遊ぶ</button>
-                        <button id="return-to-menu-button">モード選択に戻る</button>
-                    <div>
+                        <button id="play-again-button"></button>
+                        <button id="return-to-menu-button"></button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -108,73 +108,98 @@
     <div id="result-modal-overlay" class="hidden">
         <div id="result-modal">
             <h1 id="result-modal-verdict">正解</h1>
+    
+            <div class="answer-display-wrapper">
+                <div id="result-modal-profile">
+                    <div class="profile-header">
+                        <span class="verdict-prefix">正解は</span>
+                        <div class="sprite-container">
+                            <img data-field="sprite" src="" alt="pokemon-sprite">
+                        </div>
+                        <h2 class="pokemon-name-display">
+                            <span data-field="name"></span>
+                            <span class="form-name" data-field="form"></span>
+                        </h2>
+                        <span class="verdict-suffix">でした</span>
+                    </div>
+                    <div class="profile-content-wrapper">
+                        <div class="profile-left">
+                            <div class="grid-label">No.</div>
+                            <div class="grid-value" data-field="nationalNo"></div>
+                            <div class="grid-label">タマゴ1</div>
+                            <div class="grid-value" data-field="eggGroup1"></div>
 
-            <div id="result-modal-profile">
-                <div class="profile-header">
-                    <p class="verdict-prefix">正解は</p>
-                    <div class="sprite-container">
-                        <img data-field="sprite" src="" alt="pokemon-sprite">
-                    </div>
-                    <h2 class="pokemon-name-display"> <span data-field="name"></span>
-                        <span class="form-name" data-field="form"></span>
-                    </h2>
-                    <p class="verdict-suffix">でした</p>
-                </div>
-                <div class="profile-content-wrapper">
-                    <div class="profile-left">
-                        <div class="grid-label">No.</div>
-                        <div class="grid-value" data-field="nationalNo"></div>
-                        <div class="grid-label span-2-rows">タマゴ</div>
-                        <div class="grid-value" data-field="eggGroup1"></div>
-                        
-                        <div class="grid-label">世代</div>
-                        <div class="grid-value" data-field="generation"></div>
-                        <div class="grid-value" data-field="eggGroup2"></div>
-                    
-                        <div class="grid-label span-2-rows">タイプ</div>
-                        <div class="grid-value" data-field="type1"></div>
-                        <div class="grid-label">性別比</div>
-                        <div class="grid-value" data-field="genderRatio"></div>
-                    
-                        <div class="grid-value" data-field="type2"></div> <div class="grid-label">高さ</div>
-                        <div class="grid-value" data-field="height"></div>
-                    
-                        <div class="grid-label span-2-rows">特性</div>
-                        <div class="grid-value" data-field="ability1"></div>
-                        <div class="grid-label">重さ</div>
-                        <div class="grid-value" data-field="weight"></div>
-                        
-                        <div class="grid-value" data-field="ability2"></div> <div class="grid-label">進化数</div>
-                        <div class="grid-value" data-field="evolutionCount"></div>
-                    
-                        <div class="grid-label">夢特性</div>
-                        <div class="grid-value" data-field="hiddenAbility"></div>
-                        <div class="grid-label">FC</div>
-                        <div class="grid-value" data-field="formsSwitchable"></div>
-                    </div>
-                    <div class="profile-separator"></div>
-                    <div class="profile-right">
-                        <dl class="stats-list">
-                            <dt>HP</dt>
-                            <dd><div class="stat-bar-bg"><div class="stat-bar" data-field="hp-bar"></div></div><span data-field="hp"></span></dd>
-                            <dt>こうげき</dt>
-                            <dd><div class="stat-bar-bg"><div class="stat-bar" data-field="attack-bar"></div></div><span data-field="attack"></span></dd>
-                            <dt>ぼうぎょ</dt>
-                            <dd><div class="stat-bar-bg"><div class="stat-bar" data-field="defense-bar"></div></div><span data-field="defense"></span></dd>
-                            <dt>とくこう</dt>
-                            <dd><div class="stat-bar-bg"><div class="stat-bar" data-field="spAttack-bar"></div></div><span data-field="spAttack"></span></dd>
-                            <dt>とくぼう</dt>
-                            <dd><div class="stat-bar-bg"><div class="stat-bar" data-field="spDefense-bar"></div></div><span data-field="spDefense"></span></dd>
-                            <dt>すばやさ</dt>
-                            <dd><div class="stat-bar-bg"><div class="stat-bar" data-field="speed-bar"></div></div><span data-field="speed"></span></dd>
-                            <dt>合計</dt>
-                            <dd>
-                                <div class="stat-bar-bg">
-                                    <div class="stat-bar" data-field="totalStats-bar"></div>
-                                </div>
-                                <span data-field="totalStats"></span>
-                            </dd>
-                        </dl>
+                            <div class="grid-label">世代</div>
+                            <div class="grid-value" data-field="generation"></div>
+                            <div class="grid-label">タマゴ2</div>
+                            <div class="grid-value" data-field="eggGroup2"></div>
+
+                            <div class="grid-label">タイプ1</div>
+                            <div class="grid-value" data-field="type1"></div>
+                            <div class="grid-label">性別比</div>
+                            <div class="grid-value" data-field="genderRatio"></div>
+
+                            <div class="grid-label">タイプ2</div>
+                            <div class="grid-value" data-field="type2"></div>
+                            <div class="grid-label">高さ</div>
+                            <div class="grid-value" data-field="height"></div>
+
+                            <div class="grid-label">特性1</div>
+                            <div class="grid-value" data-field="ability1"></div>
+                            <div class="grid-label">重さ</div>
+                            <div class="grid-value" data-field="weight"></div>
+
+                            <div class="grid-label">特性2</div>
+                            <div class="grid-value" data-field="ability2"></div>
+                            <div class="grid-label">進化数</div>
+                            <div class="grid-value" data-field="evolutionCount"></div>
+                            
+
+                            <div class="grid-label">夢特性</div>
+                            <div class="grid-value" data-field="hiddenAbility"></div>
+                            <div class="grid-label">FC</div>
+                            <div class="grid-value" data-field="formsSwitchable"></div>
+                            </div>
+                        <div class="profile-separator"></div>
+                        <div class="profile-right">
+                            <dl class="stats-list">
+                                <dt>HP</dt>
+                                <dd>
+                                    <div class="stat-bar-bg"><div class="stat-bar" data-field="hp-bar"></div></div>
+                                    <span data-field="hp"></span>
+                                </dd>
+                                <dt>こうげき</dt>
+                                <dd>
+                                    <div class="stat-bar-bg"><div class="stat-bar" data-field="attack-bar"></div></div>
+                                    <span data-field="attack"></span>
+                                </dd>
+                                <dt>ぼうぎょ</dt>
+                                <dd>
+                                    <div class="stat-bar-bg"><div class="stat-bar" data-field="defense-bar"></div></div>
+                                    <span data-field="defense"></span>
+                                </dd>
+                                <dt>とくこう</dt>
+                                <dd>
+                                    <div class="stat-bar-bg"><div class="stat-bar" data-field="spAttack-bar"></div></div>
+                                    <span data-field="spAttack"></span>
+                                </dd>
+                                <dt>とくぼう</dt>
+                                <dd>
+                                    <div class="stat-bar-bg"><div class="stat-bar" data-field="spDefense-bar"></div></div>
+                                    <span data-field="spDefense"></span>
+                                </dd>
+                                <dt>すばやさ</dt>
+                                <dd>
+                                    <div class="stat-bar-bg"><div class="stat-bar" data-field="speed-bar"></div></div>
+                                    <span data-field="speed"></span>
+                                </dd>
+                                <dt>合計</dt>
+                                <dd>
+                                    <div class="stat-bar-bg"><div class="stat-bar" data-field="totalStats-bar"></div></div>
+                                    <span data-field="totalStats"></span>
+                                </dd>
+                            </dl>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -185,6 +210,50 @@
             </div>
         </div>
     </div>
+
+    <div id="final-score-modal-overlay" class="hidden">
+        <div id="final-score-modal">
+            <h1 id="final-score-modal-verdict">GAME CLEAR!</h1>
+            <h2 id="final-score-header"></h2>
+
+            <div class="final-score-content-wrapper">
+                <div class="score-profile-column">
+                    <div class="sprite-container">
+                        <img data-field="final-sprite-0" src="" alt="pokemon-sprite">
+                    </div>
+                    <h3 data-field="final-name-0"></h3>
+                    <div class="score-status-table" data-field="final-status-table-0">
+                        </div>
+                    <div class="score-stats-graph" data-field="final-stats-graph-0">
+                        </div>
+                </div>
+
+                <div class="score-profile-column">
+                    <div class="sprite-container">
+                        <img data-field="final-sprite-1" src="" alt="pokemon-sprite">
+                    </div>
+                    <h3 data-field="final-name-1"></h3>
+                    <div class="score-status-table" data-field="final-status-table-1"></div>
+                    <div class="score-stats-graph" data-field="final-stats-graph-1"></div>
+                </div>
+
+                <div class="score-profile-column">
+                    <div class="sprite-container">
+                        <img data-field="final-sprite-2" src="" alt="pokemon-sprite">
+                    </div>
+                    <h3 data-field="final-name-2"></h3>
+                    <div class="score-status-table" data-field="final-status-table-2"></div>
+                    <div class="score-stats-graph" data-field="final-stats-graph-2"></div>
+                </div>
+            </div>
+            
+            <div class="result-modal-buttons">
+                <button id="final-score-modal-left-button"></button>
+                <button id="final-score-modal-right-button"></button>
+            </div>
+        </div>
+    </div>
+
     <script src="pokedex-data.js"></script>
     <script src="all-pokemon-data.js"></script>
     <script src="script.js"></script>

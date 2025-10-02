@@ -709,65 +709,29 @@ body.game-mode-active .form-name {
 .verdict-prefix {
     font-size: 1.8rem;
     color: var(--c-game-text-medium);
-    align-self: flex-end;
-    margin-right: 1.5rem;
+    align-self: flex-start;
+    margin-top: 1rem;
 }
 
 .verdict-suffix {
     font-size: 1.8rem;
     color: var(--c-game-text-medium);
     align-self: flex-end;
-    margin-left: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .pokemon-name-display {
-    text-align: center; /* 名前を左揃えに */
+    text-align: center; 
 }
 
 .pokemon-name-display span {
-    display: block; /* spanをブロック要素にして改行させる */
+    display: block; 
 }
 
 .profile-header img {
     width: 100px;
     height: 100px;
     image-rendering: pixelated;
-}
-
-#play-again-button {
-    margin-top: 3rem;
-    font-size: large;
-    font-weight: bold;
-    background-color: #53a2d0;
-    border: 4px solid var(--c-border);
-    border-radius: 8px;
-    box-shadow: 2px 2px 0 var(--c-border);
-    color: var(--c-white);
-    padding: 1.0rem;
-    width: 30%;
-    max-width: 200px;
-    transition: all 0.1s ease;
-    cursor: pointer;
-    position: relative;
-    text-shadow: none;
-}
-
-#return-to-menu-button {
-    margin-top: 3rem;
-    font-size: large;
-    font-weight: bold;
-    background-color: var(--c-btn-score);
-    border: 4px solid var(--c-border);
-    border-radius: 8px;
-    box-shadow: 2px 2px 0 var(--c-border);
-    color: var(--c-white);
-    padding: 1.0rem;
-    width: 30%;
-    max-width: 200px;
-    transition: all 0.1s ease;
-    cursor: pointer;
-    position: relative;
-    text-shadow: none;
 }
 
 .sprite-container {
@@ -984,7 +948,8 @@ body.game-mode-active .form-name {
     margin-top: 2rem;
 }
 
-#result-modal-left-button {
+#result-modal-left-button,
+#final-score-modal-left-button {
     font-size: large;
     font-weight: bold;
     background-color: #53a2d0;
@@ -1001,7 +966,8 @@ body.game-mode-active .form-name {
     text-shadow: none;
 }
 
-#result-modal-right-button {
+#result-modal-right-button,
+#final-score-modal-right-button {
     font-size: large;
     font-weight: bold;
     background-color: #64b46c;
@@ -1194,4 +1160,133 @@ body.game-mode-active .suggestion-item:hover {
     #orientation-overlay {
         display: block;
     }
+}
+
+/* ==========================================================================
+   10. 最終スコアモーダル
+   ========================================================================== */
+
+#final-score-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(38, 50, 56, 0.8);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+}
+
+#final-score-modal {
+    background: #37474f;
+    border: 2px solid var(--c-game-border-light, #78909c);
+    color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 1200px; /* 横幅を広げる */
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+#final-score-modal-verdict {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#final-score-header {
+    text-align: center;
+    font-size: 1.5rem;
+    color: var(--c-game-text-light);
+    margin-bottom: 2rem;
+}
+
+.final-score-content-wrapper {
+    display: flex;
+    justify-content: space-around;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.score-profile-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(0,0,0,0.2);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.score-profile-column h3 {
+    font-size: 1.2em;
+    text-align: center;
+}
+
+.score-profile-column .sprite-container {
+    width: 120px;
+    height: 120px;
+}
+
+/* スコアモード用のステータス表のスタイル */
+.score-status-table {
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr;
+    gap: 0.5rem 1rem;
+    width: 100%;
+}
+
+.score-status-table .grid-label.span-2-rows {
+    grid-row: span 2;
+    align-self: center;
+}
+
+/* 種族値モード用のグラフのスタイル */
+.score-stats-graph {
+    width: 100%;
+}
+
+.score-stats-graph .stats-list {
+    display: grid;
+    gap: 0.4rem 0.6rem;
+    align-items: center;
+    grid-template-columns: auto 1fr;
+}
+
+.score-stats-graph .stats-list dt {
+    min-width: 50px;
+}
+
+#final-score-modal .result-modal-buttons {
+    margin-top: 2.5rem;
+}
+
+#final-score-modal-left-button,
+#final-score-modal-right-button {
+    font-size: large;
+    font-weight: bold;
+    border: 4px solid var(--c-border);
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 var(--c-border);
+    color: var(--c-white);
+    padding: 1.0rem;
+    width: 30%;
+    max-width: 300px;
+    transition: all 0.1s ease;
+    cursor: pointer;
+    position: relative;
+    text-shadow: none;
+}
+
+#final-score-modal-left-button {
+    background-color: #53a2d0;
+}
+
+#final-score-modal-right-button {
+    background-color: #64b46c;
 }
